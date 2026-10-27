@@ -20,8 +20,12 @@ build/
 
 # Clave de respuestas: NO se sube al repositorio público. El alumno recibe
 # solo el blob, que ya trae el banco incrustado (ver tools/build_grader.py).
+# El original vive en la rama `test`.
 lib/grader_u3.py
 config/preguntas_u3.yaml
+
+# Historial local de envíos del motor de calificación
+config/.envios.json
 
 # Temporales
 _tmp_*.py
