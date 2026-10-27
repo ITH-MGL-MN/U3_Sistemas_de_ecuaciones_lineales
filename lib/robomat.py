@@ -17,6 +17,11 @@ De esta forma el alumno escribe directamente, por ejemplo::
 
     q1, q2 = var('q1', 'q2')     # variables simbólicas
     J = jacobiano(M[[cos(q1)]], [q1])
+
+Operadores (importante): ``A @ B`` es el producto matricial y funciona igual en
+NumPy y en SymPy. Como ``*`` significa cosas distintas en cada biblioteca, para el
+producto elemento a elemento (el ``.*`` de MATLAB) usa ``hadamard(A, B)``, y para
+la potencia entrada por entrada, ``potencia_elem(A, n)``.
 """
 
 # ============================================================
@@ -189,3 +194,39 @@ def evaluar(expresion, variables, valores):
     sustituciones = list(zip(variables, valores))
     resultado = expresion.subs(sustituciones)
     return np.array(resultado.tolist(), dtype=float)
+
+
+def hadamard(A, B):
+    """Producto elemento a elemento (producto de Hadamard).
+
+    Equivale al `.*` de MATLAB. Existe porque `*` significa cosas distintas en
+    cada biblioteca: en NumPy multiplica elemento a elemento, pero en SymPy hace
+    el producto matricial. Esta función da **el mismo resultado** con las dos.
+
+        hadamard(M[[1, 2], [3, 4]], M[[2, 0], [1, 2]])   ->  [[2, 0], [3, 8]]
+
+    Para el producto matricial usa siempre `@`, que sí coincide en ambas.
+    """
+    es_simbolico = isinstance(A, (sym.MatrixBase, MatrizRobomat)) or \
+                   isinstance(B, (sym.MatrixBase, MatrizRobomat))
+    if es_simbolico:
+        Ma = A if isinstance(A, sym.MatrixBase) else sym.Matrix(A)
+        Mb = B if isinstance(B, sym.MatrixBase) else sym.Matrix(B)
+        return MatrizRobomat(Ma.multiply_elementwise(Mb))
+    return np.multiply(A, B)
+
+
+elem = hadamard  # alias corto
+
+
+def potencia_elem(A, n):
+    """Potencia ELEMENTO A ELEMENTO de una matriz o vector.
+
+    Hace falta porque `A ** 2` tampoco coincide: en NumPy eleva cada entrada,
+    pero en SymPy calcula la potencia matricial. Aquí el resultado es el mismo
+    en los dos casos.
+    """
+    if isinstance(A, (sym.MatrixBase, MatrizRobomat)):
+        M0 = A if isinstance(A, sym.MatrixBase) else sym.Matrix(A)
+        return MatrizRobomat(M0.applyfunc(lambda e: e ** n))
+    return np.power(A, n)
