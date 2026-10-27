@@ -26,6 +26,7 @@ U3/
 │   ├── U3_03_Seleccion_Casos.ipynb
 │   └── U3_04_Analisis_Casos.ipynb
 ├── lib/                           <-- Helpers: matlab_like + robomat (fusión)
+├── config/                        <-- config.yaml + guía del backend Apps Script
 └── reporte/                       <-- Plantilla LaTeX del reporte final
 ```
 
@@ -33,7 +34,7 @@ U3/
 
 ## 🚀 Cuadernos Interactivos en Google Colab
 
-Haz clic en las insignias para abrir cada cuaderno. *(Enlaces activos tras la Fase 2.)*
+Haz clic en las insignias para abrir cada cuaderno en Google Colab.
 
 | # | Cuaderno / Actividad | Descripción y Alcance | Enlace Directo |
 |---|---|---|:---:|
@@ -94,7 +95,7 @@ No requieres instalar software adicional: el entorno de Colab carga automáticam
 ```python
 # Carga directa del entorno enriquecido en Colab (ver lib/)
 import urllib.request
-url = "https://raw.githubusercontent.com/<usuario>/<repo>/main/lib/robomat.py"
+url = "https://raw.githubusercontent.com/ITH-MGL-MN/U3_Sistemas_de_ecuaciones_lineales/main/lib/robomat.py"
 urllib.request.urlretrieve(url, "robomat.py")
 exec(open("robomat.py").read(), globals())
 ```

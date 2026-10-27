@@ -38,11 +38,18 @@
 
 - [x] `reporte/main.tex`, `clases.cls`, `portada/`, `secciones/` (réplica de U2_T4_Reporte).
 
-## Fase 4 — Integración Colab ↔ Google Sheets / Apps Script
+## Fase 4 — Integración Colab ↔ Google Sheets / Apps Script ✅
 
-- [ ] Insignias "Open in Colab" en `README.md`.
-- [ ] Scripts Apps Script para calificaciones (NB2) y registro de equipos (NB3).
-- [ ] Prueba end-to-end.
+- [x] URL real del repo en `README.md` y en los 4 cuadernos (sin placeholders).
+- [x] `config/config.yaml` (tarea, evaluación, bloques de casos).
+- [x] `App Script/proyectos_u3.gs` — backend de registro y asignación determinista.
+- [x] Ruteo `u3_*` añadido a `doPost.gs`.
+- [x] NB3 envía el registro al backend (con degradación local si no hay token).
+- [x] NB2 envía la calificación (acción `guardar`, tarea `U3_02_Laboratorios`).
+- [x] `config/README.md` — guía de despliegue paso a paso.
+
+> ⏳ **Pendiente del profesor:** desplegar el Apps Script, obtener token + URL `/exec`
+> y pegarlos en las celdas de entorno de los cuadernos 02 y 03.
 
 ---
 

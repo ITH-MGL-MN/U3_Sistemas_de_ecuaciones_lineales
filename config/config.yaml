@@ -1,0 +1,37 @@
+# =====================================================================
+#  Configuración de la tarea U3 — Sistemas de Ecuaciones Lineales.
+# ---------------------------------------------------------------------
+#  Sigue el patrón de U2_T4: todo lo que se ajusta sin tocar código
+#  vive aquí. La teoría y las fichas de los 17 casos están en docs/,
+#  y el backend (Apps Script) está en App Script/proyectos_u3.gs.
+#
+#  ⚠️ SECRETOS: `webhook_token` y `apps_script_url` son propios del
+#  despliegue. NO los subas al repo público; usa valores de marcador
+#  aquí y reemplázalos en el motor (grader) o vía config local.
+# =====================================================================
+tarea:
+  # `id` es el nombre de la PESTAÑA de la hoja de cálculo para la
+  # calificación de laboratorios (el Apps Script la crea sola).
+  id: "U3_02_Laboratorios"
+  nombre: "Unidad 3 - Laboratorios de Métodos (sistemas lineales)"
+  materia: "Métodos Numéricos"
+
+evaluacion:
+  tolerancia_simple: 1e-6       # respuestas numéricas (relativa)
+  max_intentos: 2               # envíos permitidos (lo impone el Apps Script)
+  accion: "guardar"             # acción por defecto del webhook
+  # ⚠️ REEMPLAZAR por los valores reales al desplegar el Apps Script de U3
+  #     (corre setupWebhookToken() y pega aquí el token y la URL /exec).
+  webhook_token: "<WEBHOOK_TOKEN_U3>"
+  apps_script_url: "https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec"
+
+# Asignación determinista de casos por equipo (espejo de la lógica del
+# Cuaderno 03): el tamaño del equipo define el bloque, y la suma de los
+# dígitos de los NC define el caso dentro del bloque.
+casos:
+  bloques:
+    A: { tamano: 2, casos: ["T1", "T2", "T3", "T4"] }
+    B: { tamano: 3, casos: ["T5", "T6", "T7", "T8", "T9"] }
+    C: { tamano: 4, casos: ["T10", "T11", "T12", "T13", "T14"] }
+    D: { tamano: 5, casos: ["T15", "T16"] }
+    E: { tamano: 6, casos: ["T17"] }
