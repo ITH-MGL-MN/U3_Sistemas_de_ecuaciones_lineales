@@ -465,59 +465,199 @@ $$\mathbf{A} = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix},
 
 ### <a id="sec-1-4"></a>1.4 Sustitución Hacia Atrás (*Back Substitution*)
 
-**📘 Teoría.** Con el sistema ya triangular $\mathbf{U}\mathbf{x} = \mathbf{d}$, la última ecuación contiene una sola incógnita y se resuelve de inmediato:
+**📘 Teoría.**
 
-$$x_n = \frac{d_n}{u_{nn}}.$$
+#### La forma triangular ya casi está resuelta
 
-Las demás se despejan en orden descendente, porque al llegar a $x_i$ todas las incógnitas $x_{i+1}, \dots, x_n$ ya son conocidas:
+Después de la eliminación el sistema quedó así:
 
-$$x_i = \frac{d_i - \sum_{j=i+1}^{n} u_{ij}x_j}{u_{ii}}, \qquad i = n-1, n-2, \dots, 1.$$
+$$
+\begin{aligned}
+u_{11}x_1 + u_{12}x_2 + \cdots + u_{1n}x_n &= d_1\\
+u_{22}x_2 + \cdots + u_{2n}x_n &= d_2\\
+&\;\;\vdots\\
+u_{nn}x_n &= d_n
+\end{aligned}
+$$
 
-El costo de esta fase es $n^2 + O(n)$ FLOPs, mucho menor que el de la eliminación.
+Fíjate en la **última** ecuación: aparece una sola incógnita, $x_n$. No hay
+sistema que resolver ahí, solo una división. Y en cuanto $x_n$ es un número
+conocido, la **penúltima** ecuación queda con una sola incógnita ($x_{n-1}$),
+porque $x_n$ ya se calculó. Y así hacia arriba.
 
-**🧮 Ejemplo algebraico.** Para un sistema $2\times 2$ ya triangular,
+Ese es el motivo del nombre **sustitución hacia atrás**: se empieza por el último
+renglón y se sube, renglón por renglón.
 
-$$\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ 0 & a_{22}' & \mid & b_2' \end{bmatrix},$$
+#### Las dos fórmulas
 
-se aplica la fórmula dos veces:
+**1. La última incógnita.** Del renglón $n$:
+
+$$u_{nn}x_n = d_n \qquad\Longrightarrow\qquad x_n = \frac{d_n}{u_{nn}}.$$
+
+Requiere $u_{nn} \neq 0$; si el pivoteo se hizo bien, lo es.
+
+**2. Las demás, de abajo hacia arriba.** Para $i = n-1, n-2, \dots, 1$:
+
+$$x_i = \frac{d_i - \sum_{j=i+1}^{n} u_{ij}x_j}{u_{ii}}.$$
+
+La suma $\sum_{j=i+1}^{n}$ recorre **solo las incógnitas a la derecha de la
+diagonal** en el renglón $i$, que son justamente las que ya se calcularon. Por eso
+en cada paso no queda ninguna incógnita desconocida.
+
+Por ejemplo, en el renglón $n-1$ la suma tiene **un solo término**:
+
+$$x_{n-1} = \frac{d_{n-1} - u_{n-1,\,n}\,x_n}{u_{n-1,\,n-1}}.$$
+
+En el renglón $n-2$ tiene dos, y así sucesivamente hasta el primer renglón, donde
+la suma recorre todas las incógnitas ya conocidas.
+
+#### Por qué no se puede empezar por arriba
+
+Si se intentara despejar $x_1$ del primer renglón, aparecerían $x_2, \dots, x_n$:
+un problema con $n-1$ incógnitas, es decir, el mismo problema otra vez. Solo al
+empezar por abajo se tiene **una** incógnita por ecuación.
+
+#### Costo
+
+Esta fase requiere del orden de $n^2$ operaciones, mucho menos que las
+$\tfrac{2}{3}n^3$ de la eliminación. El detalle está en el subtema 1.5.
+
+**🧮 Ejemplo algebraico.** Para un sistema $2\times2$ ya triangular,
+
+$$
+\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ 0 & a_{22}' & \mid & b_2' \end{bmatrix},
+$$
+
+se aplica la fórmula dos veces, de abajo hacia arriba:
 
 $$x_2 = \frac{b_2'}{a_{22}'}, \qquad x_1 = \frac{b_1 - a_{12}x_2}{a_{11}}.$$
 
-La división solo es válida si $a_{11} \neq 0$ y $a_{22}' \neq 0$.
+La primera división exige $a_{22}' \neq 0$ y la segunda, $a_{11} \neq 0$.
 
-**🔢 Versión con enteros (paso a paso).** Se parte de la forma triangular del subtema 1.2:
+**🔢 Versión con enteros (paso a paso).** Se parte de la forma triangular
+obtenida en el subtema 1.2:
 
-$$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & 1/2 & 1/2 \\ 0 & 0 & -1 \end{bmatrix}, \qquad \mathbf{d} = \begin{bmatrix} 8 \\ 1 \\ 1 \end{bmatrix}.$$
+$$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & \tfrac{1}{2} & \tfrac{1}{2} \\ 0 & 0 & -1 \end{bmatrix},
+\qquad \mathbf{d} = \begin{bmatrix} 8 \\ 1 \\ 1 \end{bmatrix}.$$
 
-1. Renglón 3: $x_3 = d_3/u_{33} = 1/(-1) = -1$.
-2. Renglón 2: $x_2 = \left(d_2 - u_{23}x_3\right)/u_{22} = 3$.
-3. Renglón 1: $x_1 = \left(d_1 - u_{12}x_2 - u_{13}x_3\right)/u_{11} = 2$.
-4. Solución verificada del sistema: $\mathbf{x} = [2,\ 3,\ -1]$.
+1. **Renglón 3.** Tiene una sola incógnita: $-1\,x_3 = 1$, entonces
+   $$x_3 = \frac{d_3}{u_{33}} = \frac{1}{-1} = -1.$$
+
+2. **Renglón 2.** Ya se conoce $x_3$, así que
+   $$\tfrac{1}{2}x_2 + \tfrac{1}{2}x_3 = 1
+   \qquad\Longrightarrow\qquad
+   x_2 = \frac{d_2 - u_{23}x_3}{u_{22}} = \frac{1 - \tfrac{1}{2}(-1)}{\tfrac{1}{2}}
+   = \frac{1 + \tfrac{1}{2}}{\tfrac{1}{2}} = \frac{\tfrac{3}{2}}{\tfrac{1}{2}} = 3.$$
+
+3. **Renglón 1.** Ya se conocen $x_2$ y $x_3$:
+   $$2x_1 + x_2 - x_3 = 8
+   \qquad\Longrightarrow\qquad
+   x_1 = \frac{d_1 - u_{12}x_2 - u_{13}x_3}{u_{11}}
+   = \frac{8 - (1)(3) - (-1)(-1)}{2} = \frac{8 - 3 - 1}{2} = \frac{4}{2} = 2.$$
+
+4. **Solución:** $\mathbf{x} = [2,\ 3,\ -1]$.
+
+5. **Comprobación en el sistema original** (no en el triangular, para detectar
+   errores arrastrados desde la eliminación):
+
+   - $2(2) + (3) - (-1) = 4 + 3 + 1 = 8$ ✓
+   - $-3(2) - (3) + 2(-1) = -6 - 3 - 2 = -11$ ✓
+   - $-2(2) + (3) + 2(-1) = -4 + 3 - 2 = -3$ ✓
+
+   Las tres ecuaciones se cumplen, así que la solución es correcta.
 
 ---
 
 ### <a id="sec-1-5"></a>1.5 Complejidad Computacional
 
-**📘 Teoría.** Un FLOP es una operación de punto flotante (una suma o una multiplicación). Contar FLOPs es la forma estándar de comparar el costo de dos métodos.
+**📘 Teoría.**
 
-La eliminación hacia adelante necesita
+#### Qué es un FLOP y para qué contarlos
 
-$$\frac{2}{3}n^{3} + O(n^{2}) \ \text{FLOPs},$$
+Un **FLOP** (*floating point operation*) es una operación aritmética entre
+números reales: una suma, una resta, una multiplicación o una división. Contarlos
+sirve para dos cosas:
 
-la sustitución hacia atrás solo $n^{2} + O(n)$ FLOPs, y el costo total del método es $O(n^{3})$. El término cúbico domina: duplicar $n$ multiplica aproximadamente por ocho el trabajo de eliminación, mientras que la sustitución se multiplica por cuatro.
+1. **Comparar algoritmos** sin depender de la computadora: el método con menos
+   FLOPs será más rápido.
+2. **Predecir cómo crece el tiempo** al aumentar el tamaño $n$ del sistema.
 
-**🧮 Ejemplo algebraico.** Para $n$ genérico, en el paso $k$ se actualizan $n-k$ renglones y cada uno cuesta cerca de $2(n-k+1)$ FLOPs (un multiplicador, $n-k+1$ productos y otras tantas restas). Sumando sobre todos los pasos:
+Se adopta la convención habitual: cada multiplicación, división, suma o resta
+cuenta como **1 FLOP**. Una operación combinada del tipo $a - m\cdot c$ cuenta
+como **2 FLOPs** (una multiplicación y una resta).
 
-$$\sum_{k=1}^{n-1}\sum_{i=k+1}^{n} 2(n-k+1) \;=\; \frac{2}{3}n^{3} + O(n^{2}),$$
+#### Cuánto cuesta la eliminación
 
-mientras que la sustitución hacia atrás, que solo recorre una vez los renglones, aporta $n^{2} + O(n)$. La razón entre ambos costos crece con $n$: para $n$ grande la eliminación es quien manda.
+En el paso $k$ hay $n-k$ renglones por eliminar. Cada uno cuesta:
 
-**🔢 Versión con enteros (paso a paso).** Con $n = 3$:
+| Concepto | FLOPs |
+|---|---|
+| Calcular el multiplicador $m_{ik} = a_{ik}/a_{kk}$ | $1$ |
+| Actualizar los coeficientes de las columnas $k+1$ a $n$ ($n-k$ productos y $n-k$ restas) | $2(n-k)$ |
+| Actualizar el lado derecho $b_i$ (un producto y una resta) | $2$ |
+| **Total por renglón** | $2(n-k)+3$ |
 
-1. Se evalúa el término cúbico de la eliminación: $\tfrac{2}{3}n^{3} = \tfrac{2}{3}(27) = 18$ FLOPs.
-2. Ese valor es un **orden de magnitud**, no un conteo exacto: los términos $O(n^{2})$ y las operaciones sobre $\mathbf{b}$ ajustan la cifra.
-3. Para comparar, la sustitución hacia atrás aporta del orden de $n^{2} = 9$ FLOPs.
-4. Conclusión para $n=3$: el total lo domina la eliminación, con cerca de 18 FLOPs frente a unos 9 de la sustitución.
+Multiplicando por los $n-k$ renglones y sumando sobre todos los pasos:
+
+$$C_{\text{elim}} = \sum_{k=1}^{n-1}(n-k)\left[2(n-k)+3\right]
+= \frac{n(n-1)(4n+7)}{6}.$$
+
+#### Cuánto cuesta la sustitución hacia atrás
+
+La última incógnita cuesta **1** FLOP (una división). Cada una de las demás
+cuesta $2(n-i)$ FLOPs por los productos y restas de la suma, más $1$ por la
+división final, es decir $2(n-i)+1$. Sumando:
+
+$$C_{\text{sust}} = 1 + \sum_{i=1}^{n-1}\left[2(n-i)+1\right] = n^{2}.$$
+
+Sencillo y exacto: la sustitución cuesta exactamente $n^2$ FLOPs.
+
+#### Por qué el término cúbico es el que manda
+
+Para $n$ grande, $\dfrac{n(n-1)(4n+7)}{6} \approx \dfrac{2}{3}n^{3}$, mientras que
+la sustitución se queda en $n^{2}$. El cociente entre ambos crece sin límite, así
+que el costo total es $O(n^{3})$ y lo aporta casi todo la eliminación.
+
+Con números concretos:
+
+| $n$ | Eliminación (exacta) | $\approx\frac{2}{3}n^{3}$ | Sustitución ($n^2$) |
+|---:|---:|---:|---:|
+| 3 | 19 | 18 | 9 |
+| 10 | 645 | 667 | 100 |
+| 1\,000 | 667\,165\,500 | 666\,666\,667 | 1\,000\,000 |
+
+La consecuencia práctica: **duplicar** $n$ multiplica el trabajo de eliminación
+por $\approx 8$ (porque $2^3 = 8$), mientras que la sustitución solo se
+multiplica por $4$. Por eso, cuando $n$ crece, lo único que importa es reducir el
+número de operaciones de la eliminación; ahí está el interés de los métodos
+especializados (LU, Thomas, Cholesky) que vienen en los subtemas siguientes.
+
+**🧮 Ejemplo algebraico.** La cuenta anterior ya está hecha para $n$ genérico: las
+fórmulas $C_{\text{elim}} = \frac{n(n-1)(4n+7)}{6}$ y $C_{\text{sust}} = n^2$ valen
+para cualquier tamaño. Si se abre el numerador de la primera,
+
+$$C_{\text{elim}} = \frac{4n^{3} + 3n^{2} - 7n}{6}
+= \frac{2}{3}n^{3} + \frac{1}{2}n^{2} - \frac{7}{6}n,$$
+
+se ve de dónde salen los dos términos: el cúbico $\frac{2}{3}n^3$ y el cuadrático
+$O(n^2)$, que para $n$ grande queda opacado por el primero.
+
+**🔢 Versión con enteros (paso a paso).** Con $n = 3$ se puede contar a mano,
+usando el mismo sistema del subtema 1.2:
+
+1. **Paso $k=1$:** hay $n-k = 2$ renglones por eliminar. Cada uno cuesta
+   $2(2)+3 = 7$ FLOPs (1 del multiplicador, $2\cdot2 = 4$ de los coeficientes y 2
+   del lado derecho). Total: $2 \times 7 = 14$ FLOPs.
+2. **Paso $k=2$:** queda $n-k = 1$ renglón, que cuesta $2(1)+3 = 5$ FLOPs.
+3. **Eliminación completa:** $14 + 5 = 19$ FLOPs. La fórmula da
+   $\frac{(3)(2)(12+7)}{6} = \frac{3\cdot2\cdot19}{6} = 19$ ✓
+4. **Sustitución hacia atrás:** $x_3$ cuesta $1$ FLOP; $x_2$ cuesta
+   $2(1)+1 = 3$; $x_1$ cuesta $2(2)+1 = 5$. Total: $1+3+5 = 9$ FLOPs, que es
+   $n^{2} = 9$ ✓
+5. **Total del método:** $19 + 9 = 28$ FLOPs.
+6. **Comparación con la cota:** $\frac{2}{3}n^{3} = 18$ frente al valor exacto
+   $19$; la diferencia ($1$ FLOP) viene del término cuadrático que la cota
+   desprecia. Para $n = 3$ pesa, pero para $n$ grande deja de importar.
 
 ---
 
