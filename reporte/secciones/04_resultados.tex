@@ -1,0 +1,41 @@
+\section{Resultados}
+\label{sec:resultados}
+
+% ==== Opción 1: pega aquí los resultados generados por el Cuaderno 04 ====
+% El Cuaderno 04 exporta un archivo `resultados.tex` (matriz, vector y tabla de
+% métodos). Cópialo a esta carpeta y descomenta la siguiente línea:
+% \input{resultados}
+
+\subsection{Solución del sistema}
+La solución obtenida por los distintos métodos fue:
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{lc}
+		\toprule
+		Método & Solución $\mathbf{x}$ \\
+		\midrule
+		Eliminación Gaussiana & (escribe aquí) \\
+		Descomposición LU     & (escribe aquí) \\
+		Gauss--Seidel         & (escribe aquí) \\
+		Thomas / Cholesky     & (escribe aquí) \\
+		\texttt{np.linalg.solve} (referencia) & (escribe aquí) \\
+		\bottomrule
+	\end{tabular}
+	\caption{Comparación de la solución por método.}
+	\label{tab:metodos}
+\end{table}
+
+\subsection{Análisis de Monte Carlo}
+Se perturbó el vector $\mathbf{b}$ con ruido relativo y se resolvió el sistema $N$ veces
+para evaluar la sensibilidad de la solución. La figura~\ref{fig:montecarlo} muestra la
+distribución resultante.
+
+\begin{figure}[h]
+	\centering
+	% \includegraphics[width=0.8\textwidth]{img/mc_boxplot.png}
+	\caption{Box plot de la solución ante incertidumbre en $\mathbf{b}$.}
+	\label{fig:montecarlo}
+\end{figure}
+
+% Comenta: ¿el sistema está bien o mal condicionado? ¿Qué implica el valor de Cond(A)?

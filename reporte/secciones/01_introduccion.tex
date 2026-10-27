@@ -1,0 +1,27 @@
+\section{Introducción}
+\label{sec:introduccion}
+
+% ==== REEMPLAZA este texto por la introducción de TU caso ====
+Muchos problemas de ingeniería —circuitos eléctricos, estructuras, redes de tuberías,
+balances de masa y procesos térmicos— se modelan como un \textbf{sistema de ecuaciones
+algebraicas lineales} de la forma
+
+\begin{equation}
+\mathbf{A}\,\mathbf{x} = \mathbf{b}
+\label{eq:sistema}
+\end{equation}
+
+donde $\mathbf{A}\in\mathbb{R}^{n\times n}$ es la matriz de coeficientes,
+$\mathbf{x}\in\mathbb{R}^{n}$ es el vector de incógnitas y
+$\mathbf{b}\in\mathbb{R}^{n}$ es el vector de términos independientes.
+
+El objetivo de este reporte es resolver el caso de estudio asignado mediante métodos
+numéricos \textbf{directos} (Eliminación Gaussiana con pivoteo, Descomposición LU) e
+\textbf{iterativos} (Gauss--Seidel), así como algoritmos para \textbf{matrices especiales}
+(Thomas y Cholesky). Se compara la implementación ``a mano'' contra los \emph{solvers}
+profesionales de \texttt{NumPy}/\texttt{SciPy} y se somete el sistema a una simulación de
+\textbf{Monte Carlo} para evaluar su \textbf{condicionamiento} y sensibilidad ante
+incertidumbre en los datos.
+
+% Explica aquí: qué fenómeno físico modela tu caso, por qué es un sistema lineal,
+% y qué decisión de ingeniería depende de la solución.

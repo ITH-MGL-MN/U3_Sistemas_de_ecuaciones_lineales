@@ -1,0 +1,23 @@
+\section{Metodología: Métodos Numéricos}
+\label{sec:metodologia}
+
+Se implementaron y compararon los siguientes métodos (ver \texttt{docs/metodos/} y los
+archivos \texttt{.py} generados en el Cuaderno 04):
+
+\begin{enumerate}
+	\item \textbf{Eliminación Gaussiana con pivoteo parcial.} Triangulariza $\mathbf{A}$
+	hacia una matriz superior $\mathbf{U}$ mediante operaciones de renglón
+	$R_i \leftarrow R_i - m_{ik}R_k$, con $m_{ik}=a_{ik}/a_{kk}$, y resuelve por
+	sustitución hacia atrás.
+	\item \textbf{Descomposición LU (Doolittle).} Factoriza $\mathbf{A}=\mathbf{L}\mathbf{U}$
+	con diagonal unitaria en $\mathbf{L}$, resolviendo $\mathbf{L}\mathbf{d}=\mathbf{b}$ y
+	luego $\mathbf{U}\mathbf{x}=\mathbf{d}$.
+	\item \textbf{Gauss--Seidel (iterativo).} Actualiza cada componente
+	$x_i^{(k+1)}$ usando los valores más recientes; converge si $\mathbf{A}$ es
+	estrictamente diagonal dominante.
+	\item \textbf{Algoritmo de Thomas / Cholesky.} Para matrices tridiagonales o
+	simétricas definidas positivas, con costo $O(n)$ o $\tfrac{1}{3}n^3$, respectivamente.
+\end{enumerate}
+
+% Detalla qué solvers de NumPy/SciPy usaste como referencia:
+%   np.linalg.solve, scipy.linalg.lu, scipy.linalg.solve_triangular, np.linalg.cond, ...
