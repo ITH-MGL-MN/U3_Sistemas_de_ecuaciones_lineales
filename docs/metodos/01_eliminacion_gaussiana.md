@@ -154,7 +154,7 @@ $$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}, \qquad \mathbf{b} =
 2. Se arma la matriz aumentada, separando los coeficientes de los términos
    independientes con una raya vertical:
 
-   $$\begin{bmatrix} 2 & 1 & \mid & 4 \\ 1 & 3 & \mid & 7 \end{bmatrix}$$
+$$\begin{bmatrix} 2 & 1 & \mid & 4 \\ 1 & 3 & \mid & 7 \end{bmatrix}$$
 
 3. Se revisa el pivote de la columna 1: $a_{11} = 2 \neq 0$, por lo que se puede eliminar hacia adelante sin intercambiar renglones.
 
