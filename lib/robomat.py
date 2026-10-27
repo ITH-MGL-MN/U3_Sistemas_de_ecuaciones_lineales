@@ -97,32 +97,41 @@ def ones(*args, **kwargs):
     return _np_ones(*args, **kwargs)
 
 
+def eye(*args, **kwargs):
+    """eye(n) -> identidad n x n;  eye(m, n) -> identidad rectangular m x n."""
+    return np.eye(*args, **kwargs)
+
+
 def _forma_simbolica(args):
     """Dimensiones para las variantes simbólicas: (n, n) si recibe solo n."""
     dims = _dimensiones(args)
     if dims is None:
-        raise TypeError('Usa zeros_sym(n), zeros_sym(m, n) o zeros_sym((m, n)).')
+        raise TypeError('Usa zeros.sym(n), zeros.sym(m, n) o zeros.sym((m, n)).')
     return dims if len(dims) > 1 else (dims[0], dims[0])
 
 
 def zeros_sym(*args):
     """Matriz SIMBÓLICA de ceros: zeros_sym(3) -> 3x3, zeros_sym(2, 3) -> 2x3.
 
-    Útil para construirla vacía y luego llenarla con números y letras:
-
-        A = zeros_sym(2, 2);  A[0, 0] = x;  A[1, 1] = cos(q)
+    También disponible como ``zeros.sym(...)``.
     """
     return MatrizRobomat(sym.zeros(*_forma_simbolica(args)))
 
 
 def ones_sym(*args):
-    """Matriz SIMBÓLICA de unos: ones_sym(3) -> 3x3."""
+    """Matriz SIMBÓLICA de unos. También disponible como ``ones.sym(...)``."""
     return MatrizRobomat(sym.ones(*_forma_simbolica(args)))
 
 
 def eye_sym(*args):
-    """Matriz SIMBÓLICA identidad: eye_sym(3) -> 3x3."""
+    """Matriz SIMBÓLICA identidad. También disponible como ``eye.sym(...)``."""
     return MatrizRobomat(sym.eye(*_forma_simbolica(args)))
+
+
+# Forma corta preferida: zeros.sym(3), ones.sym(2, 3), eye.sym(3)
+zeros.sym = zeros_sym
+ones.sym = ones_sym
+eye.sym = eye_sym
 
 
 # ------------------------------------------------------------------
@@ -284,7 +293,10 @@ class _CreadorMatriz:
 
 
 class _CreadorIdentidad:
-    """I[4] -> eye(4); I[3, 4] -> identidad rectangular eye(3, 4)."""
+    """I[4] -> eye(4); I[3, 4] -> identidad rectangular eye(3, 4).
+
+    Con ``I.sym[...]`` devuelve la versión simbólica: I.sym[3], I.sym[3, 4].
+    """
 
     def __getitem__(self, dims):
         if isinstance(dims, (int, np.integer)):
@@ -295,14 +307,51 @@ class _CreadorIdentidad:
             'Usa I[n] para la identidad n x n, o I[m, n] para la rectangular. '
             'Para desplazar la diagonal usa eye(m, n, k).')
 
+    @property
+    def sym(self):
+        """Versión simbólica: I.sym[3] -> identidad simbólica 3x3."""
+        return _CreadorIdentidadSimbolica()
+
+
+class _CreadorIdentidadSimbolica:
+    """I.sym[4] -> eye_sym(4); I.sym[3, 4] -> eye_sym(3, 4)."""
+
+    def __getitem__(self, dims):
+        if isinstance(dims, (int, np.integer)):
+            return MatrizRobomat(sym.eye(int(dims)))
+        if isinstance(dims, tuple) and len(dims) == 2:
+            return MatrizRobomat(sym.eye(int(dims[0]), int(dims[1])))
+        raise ValueError('Usa I.sym[n] o I.sym[m, n].')
+
 
 M = _CreadorMatriz()
 I = _CreadorIdentidad()
 
 
-def var(*nombres):
-    """Crea variables simbólicas: var('q1', 'q2', 'L1')."""
-    return sym.symbols(' '.join(nombres))
+def var(*args):
+    """Crea símbolos o convierte a simbólico, según el tipo de entrada.
+
+    - ``var('q1', 'q2')``        -> crea variables simbólicas
+    - ``var(A)``                 -> convierte la matriz A (NumPy o lista) a simbólica
+    - ``var(2)``                 -> convierte un número a entero simbólico
+
+    Como en MATLAB con ``sym(A)``: la misma función sirve para las dos cosas,
+    y decide sola mirando lo que recibe.
+    """
+    if len(args) == 1 and not isinstance(args[0], str):
+        dato = args[0]
+        if isinstance(dato, MatrizRobomat):
+            return dato
+        if isinstance(dato, sym.MatrixBase):
+            return MatrizRobomat(dato)
+        if isinstance(dato, np.ndarray):
+            return MatrizRobomat(sym.Matrix(dato.tolist()))
+        if isinstance(dato, (list, tuple)):
+            return MatrizRobomat(sym.Matrix(dato))
+        return sym.sympify(dato)
+    if not all(isinstance(a, str) for a in args):
+        raise TypeError("var() espera nombres ('x', 'y'), una matriz o un número")
+    return sym.symbols(' '.join(args))
 
 
 variables_articulares = var  # alias legible
