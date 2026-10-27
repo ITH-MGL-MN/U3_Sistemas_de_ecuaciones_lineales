@@ -8,7 +8,7 @@ Analizar, implementar y evaluar métodos numéricos directos e iterativos para l
 ## 🗺️ Mapa de Navegación del Repositorio
 
 ```text
-U3_Repo/
+U3/
 ├── README.md                      <-- Centro de mando e instrucciones generales
 ├── docs/
 │   ├── metodos/                   <-- Guías teóricas completas con ecuaciones en LaTeX

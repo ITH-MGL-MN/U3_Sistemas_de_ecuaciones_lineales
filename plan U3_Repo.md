@@ -19,16 +19,17 @@
 - [x] `.gitignore` (`__pycache__/`, `.ipynb_checkpoints/`, `*.aux`, `build/`, `grader_ofuscado.txt`, temporales).
 - [x] No tocar `U3_T1/` ni los borradores fuente.
 
-## Fase 1 — Documentación markdown
+## Fase 1 — Documentación markdown ✅
 
-- [ ] Partir `metodos_u3_completo.md` → `docs/metodos/` (5 archivos).
-- [ ] Partir `casos_u3_completo.md` → `docs/casos/` (17 + índice).
-  - ⚠️ Corregir corrupción de secuencias LaTeX (`\b`→0x08, `\t`→0x09, `\f`→0x0C, `\n`→0x0A, `\a`→0x07).
-- [ ] Reescribir `README.md` (reconciliado con los 4 cuadernos).
+- [x] Partir `metodos_u3_completo.md` → `docs/metodos/` (5 archivos).
+- [x] Partir `casos_u3_completo.md` → `docs/casos/` (17 + índice).
+  - ⚠️ Corregir corrupción de secuencias LaTeX (`\b`→0x08, `\t`→0x09, `\f`→0x0C, `\n`→0x0A, `\a`→0x07) y `\\` colapsado a `\`.
+- [x] Reescribir `README.md` (reconciliado con los 4 cuadernos).
 
 ## Fase 2 — Cuadernos Colab (los 4)
 
-- [ ] `01_Algebra_Lineal.ipynb` — fusión `matlab_like` + `robomat`, intro práctica.
+- [x] `lib/robomat.py` — fusión `matlab_like` + `robomat` (con sobreescritura de builtins sombreados).
+- [x] `01_Algebra_Lineal.ipynb` — fusión `matlab_like` + `robomat`, intro práctica.
 - [ ] `02_Laboratorios_Metodos.ipynb` — laboratorios + autograder (MCQ + numéricas), patrón U2_T3B.
 - [ ] `03_Seleccion_Casos.ipynb` — registro equipos + asignación determinista por NC, patrón U2_T4_1.
 - [ ] `04_Analisis_Casos.ipynb` — cada método en `.py`, comparación manual vs NumPy/SciPy, patrón U2_T4_2.
