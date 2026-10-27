@@ -1,6 +1,17 @@
 # Matrices Especiales: Algoritmo de Thomas y Cholesky
 
-### 4.1 Matrices Tridiagonales y el Algoritmo de Thomas
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Métodos Iterativos: Gauss-Seidel y Relajación](03_metodos_iterativos.md) | [README](../../README.md) | [Referencias Cruzadas y Matriz Comparativa de Desempeño](05_comparativa.md) |
+
+## 📑 Índice
+
+1. [4.1 Matrices Tridiagonales y el Algoritmo de Thomas](#sec-4-1)
+2. [4.2 Factorización de Cholesky para Matrices Simétricas Definidas Positivas](#sec-4-2)
+3. [🔢 Ejemplo resuelto: Algoritmo de Thomas](#sec-ej-thomas)
+4. [🔢 Ejemplo resuelto: Cholesky](#sec-ej-cholesky)
+
+### <a id="sec-4-1"></a>4.1 Matrices Tridiagonales y el Algoritmo de Thomas
 
 #### Estructura del Sistema
 Un sistema tridiagonal surge de la discretización por diferencias finitas en sistemas continuos (redes térmicas, vigas y difusión) y tiene coeficientes no nulos **exclusivamente en la diagonal principal y en las dos subdiagonales adyacentes**:
@@ -32,7 +43,7 @@ Es una versión altamente optimizada de la Descomposición LU *(véase [Sección
 
 ---
 
-### 4.2 Factorización de Cholesky para Matrices Simétricas Definidas Positivas
+### <a id="sec-4-2"></a>4.2 Factorización de Cholesky para Matrices Simétricas Definidas Positivas
 
 #### Propiedades
 Una matriz cuadrada $\mathbf{A}$ es **simétrica y definida positiva** si:
@@ -79,7 +90,7 @@ Para el renglón $k \in \{1, 2, \dots, n\}$:
 
 ---
 
-## 🔢 Ejemplo resuelto: Algoritmo de Thomas
+### <a id="sec-ej-thomas"></a>🔢 Ejemplo resuelto: Algoritmo de Thomas
 
 Sistema tridiagonal (p. ej. conducción térmica 1D o masa-resorte):
 
@@ -99,7 +110,7 @@ $$x_3 = \frac{1.3333}{1.3333} = 1, \quad x_2 = \frac{0.5 - (-1)(1)}{1.5} = 1, \q
 
 **Solución:** $\mathbf{x} = [1,\ 1,\ 1]^T$ en $O(n)$ operaciones. ✅
 
-## 🔢 Ejemplo resuelto: Cholesky
+### <a id="sec-ej-cholesky"></a>🔢 Ejemplo resuelto: Cholesky
 
 Para una matriz **simétrica definida positiva** $\mathbf{A} = \begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix}$:
 
@@ -109,5 +120,7 @@ $$\mathbf{L} = \begin{bmatrix} 2 & 0 \\ 1 & \sqrt{2} \end{bmatrix}, \qquad \math
 
 ---
 
-> [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Métodos Iterativos: Gauss-Seidel y Relajación](03_metodos_iterativos.md) | [README](../../README.md) | [Referencias Cruzadas y Matriz Comparativa de Desempeño](05_comparativa.md) |
 

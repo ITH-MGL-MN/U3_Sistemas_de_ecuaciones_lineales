@@ -1,6 +1,19 @@
 # Eliminación Gaussiana y Pivoteo Parcial
 
-### 1.1 Formulación Matricial del Sistema
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| — | [README](../../README.md) | [Descomposición LU e Inversión de Matrices](02_descomposicion_lu.md) |
+
+## 📑 Índice
+
+1. [1.1 Formulación Matricial del Sistema](#sec-1-1)
+2. [1.2 Eliminación Hacia Adelante (*Forward Elimination*)](#sec-1-2)
+3. [1.3 Estrategia de Pivoteo Parcial Por Renglón](#sec-1-3)
+4. [1.4 Sustitución Hacia Atrás (*Back Substitution*)](#sec-1-4)
+5. [1.5 Complejidad Computacional](#sec-1-5)
+6. [🔢 Ejemplo resuelto paso a paso](#sec-ejemplo)
+
+### <a id="sec-1-1"></a>1.1 Formulación Matricial del Sistema
 Un sistema simultáneo de $n$ ecuaciones lineales algebraicas con $n$ incógnitas se expresa como:
 
 $$\mathbf{A}\mathbf{x} = \mathbf{b}$$
@@ -28,7 +41,7 @@ a_{n1} & a_{n2} & \dots & a_{nn} & \mid & b_n
 
 ---
 
-### 1.2 Eliminación Hacia Adelante (*Forward Elimination*)
+### <a id="sec-1-2"></a>1.2 Eliminación Hacia Adelante (*Forward Elimination*)
 El objetivo de esta fase es transformar la matriz de coeficientes $\mathbf{A}$ en una matriz **triangular superior** $\mathbf{U}$.
 
 Para cada pivote $k \in \{1, 2, \dots, n-1\}$:
@@ -51,7 +64,7 @@ a_{11} & a_{12} & a_{13} & \dots & a_{1n} & \mid & b_1 \\
 
 ---
 
-### 1.3 Estrategia de Pivoteo Parcial Por Renglón
+### <a id="sec-1-3"></a>1.3 Estrategia de Pivoteo Parcial Por Renglón
 
 #### Diagnóstico de Fallas
 La eliminación Gaussiana simple presenta dos limitaciones severas:
@@ -76,7 +89,7 @@ $$\det(\mathbf{A}) = (-1)^{p_{\text{swaps}}} \prod_{k=1}^n u_{kk}$$
 
 ---
 
-### 1.4 Sustitución Hacia Atrás (*Back Substitution*)
+### <a id="sec-1-4"></a>1.4 Sustitución Hacia Atrás (*Back Substitution*)
 Con el sistema en forma triangular superior $\mathbf{U}\mathbf{x} = \mathbf{d}$, las incógnitas se despejan iterativamente desde la última ($x_n$) hasta la primera ($x_1$):
 
 1. **Última incógnita**:
@@ -87,7 +100,7 @@ Con el sistema en forma triangular superior $\mathbf{U}\mathbf{x} = \mathbf{d}$,
 
 ---
 
-### 1.5 Complejidad Computacional
+### <a id="sec-1-5"></a>1.5 Complejidad Computacional
 * **Fase de eliminación:** $\frac{2}{3} n^3 + O(n^2)$ FLOPs (operaciones de punto flotante).
 * **Fase de sustitución hacia atrás:** $n^2 + O(n)$ FLOPs.
 * **Costo Total:** $O(n^3)$.
@@ -96,7 +109,7 @@ Con el sistema en forma triangular superior $\mathbf{U}\mathbf{x} = \mathbf{d}$,
 
 ---
 
-## 🔢 Ejemplo resuelto paso a paso
+### <a id="sec-ejemplo"></a>🔢 Ejemplo resuelto paso a paso
 
 Resolvamos el sistema clásico de Chapra (Ejemplo 9.5):
 
@@ -130,5 +143,7 @@ $$x_1 = \frac{7.85 - (-0.1)(-2.5) - (-0.2)(7)}{3} = 3$$
 
 ---
 
-> [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| — | [README](../../README.md) | [Descomposición LU e Inversión de Matrices](02_descomposicion_lu.md) |
 

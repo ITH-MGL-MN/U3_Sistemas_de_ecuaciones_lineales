@@ -1,6 +1,19 @@
 # Descomposición LU e Inversión de Matrices
 
-### 2.1 Motivación e Idea Central
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Eliminación Gaussiana y Pivoteo Parcial](01_eliminacion_gaussiana.md) | [README](../../README.md) | [Métodos Iterativos: Gauss-Seidel y Relajación](03_metodos_iterativos.md) |
+
+## 📑 Índice
+
+1. [2.1 Motivación e Idea Central](#sec-2-1)
+2. [2.2 Estrategia de Solución en Dos Pasos](#sec-2-2)
+3. [2.3 Variantes de Factorización](#sec-2-3)
+4. [2.4 Cálculo Eficiente de la Matriz Inversa $\mathbf{A}^{-1}$](#sec-2-4)
+5. [2.5 Condicionamiento del Sistema y Normas Matriciales](#sec-2-5)
+6. [🔢 Ejemplo resuelto paso a paso](#sec-ejemplo)
+
+### <a id="sec-2-1"></a>2.1 Motivación e Idea Central
 En muchas aplicaciones de ingeniería (ej. análisis de circuitos o estructuras sujetas a múltiples combinaciones de carga), es necesario resolver $\mathbf{A}\mathbf{x} = \mathbf{b}$ para **múltiples vectores independientes $\mathbf{b}$** manteniendo la misma matriz de estructura $\mathbf{A}$.
 
 La Eliminación Gaussiana estándar repite el trabajo pesado $O(n^3)$ para cada nuevo vector $\mathbf{b}$. La **descomposición LU** separa el trabajo computacional:
@@ -9,7 +22,7 @@ La Eliminación Gaussiana estándar repite el trabajo pesado $O(n^3)$ para cada 
 
 ---
 
-### 2.2 Estrategia de Solución en Dos Pasos
+### <a id="sec-2-2"></a>2.2 Estrategia de Solución en Dos Pasos
 
 Dado el sistema $\mathbf{A}\mathbf{x} = \mathbf{b}$ y la factorización $\mathbf{A} = \mathbf{L}\mathbf{U}$:
 
@@ -29,7 +42,7 @@ Definiendo un vector intermedio $\mathbf{d} = \mathbf{U}\mathbf{x}$:
 
 ---
 
-### 2.3 Variantes de Factorización
+### <a id="sec-2-3"></a>2.3 Variantes de Factorización
 
 #### A. Factorización de Doolittle
 * La matriz $\mathbf{L}$ es triangular inferior con **unos en la diagonal principal** ($l_{ii} = 1$).
@@ -57,7 +70,7 @@ $$u_{jk} = \frac{a_{jk} - \sum_{i=1}^{j-1} l_{ji} u_{ik}}{l_{jj}}, \quad \text{p
 
 ---
 
-### 2.4 Cálculo Eficiente de la Matriz Inversa $\mathbf{A}^{-1}$
+### <a id="sec-2-4"></a>2.4 Cálculo Eficiente de la Matriz Inversa $\mathbf{A}^{-1}$
 
 La matriz inversa $\mathbf{X} = \mathbf{A}^{-1}$ satisface:
 
@@ -74,7 +87,7 @@ $$\mathbf{A}\mathbf{x}^{(j)} = \mathbf{e}^{(j)}, \quad \text{para } j = 1, \dots
 
 ---
 
-### 2.5 Condicionamiento del Sistema y Normas Matriciales
+### <a id="sec-2-5"></a>2.5 Condicionamiento del Sistema y Normas Matriciales
 
 #### Número de Condición $\text{Cond}(\mathbf{A})$
 Mide la sensibilidad de la solución $\mathbf{x}$ ante pequeñas variaciones o errores en los datos de entrada ($\mathbf{A}$ o $\mathbf{b}$):
@@ -95,7 +108,7 @@ $$\frac{\|\Delta \mathbf{x}\|}{\|\mathbf{x}\|} \le \text{Cond}(\mathbf{A}) \cdot
 
 ---
 
-## 🔢 Ejemplo resuelto paso a paso
+### <a id="sec-ejemplo"></a>🔢 Ejemplo resuelto paso a paso
 
 Factorizamos la misma matriz del ejemplo de Gauss por **Doolittle**:
 
@@ -123,5 +136,7 @@ Comprobamos $\mathbf{A} = \mathbf{L}\mathbf{U}$ multiplicando. Para resolver $\m
 
 ---
 
-> [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Eliminación Gaussiana y Pivoteo Parcial](01_eliminacion_gaussiana.md) | [README](../../README.md) | [Métodos Iterativos: Gauss-Seidel y Relajación](03_metodos_iterativos.md) |
 

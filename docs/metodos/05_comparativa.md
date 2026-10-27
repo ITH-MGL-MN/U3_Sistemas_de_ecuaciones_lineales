@@ -1,3 +1,13 @@
+# Referencias Cruzadas y Matriz Comparativa de Desempeño
+
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Matrices Especiales: Algoritmo de Thomas y Cholesky](04_matrices_especiales.md) | [README](../../README.md) | [Casos de estudio](../casos/casos_index.md) |
+
+## 📑 Índice
+
+1. [📌 Enlaces Relacionados en el Repositorio](#sec-enlaces)
+
 | Método Numérico | Tipo de Algoritmo | Complejidad Temporal | Memoria Requerida | Requisito de Estabilidad / Convergencia | Caso de Uso Ideal en Ingeniería |
 |---|---|:---:|:---:|---|---|
 | **Eliminación Gaussiana** | Directo | $O(n^3)$ | $O(n^2)$ | Sensible a $a_{kk}=0$; requiere **Pivoteo Parcial** | Sistemas densos pequeños/medianos con un solo lado derecho $\mathbf{b}$. |
@@ -8,12 +18,14 @@
 
 ---
 
-### 📌 Enlaces Relacionados en el Repositorio:
+### <a id="sec-enlaces"></a>📌 Enlaces Relacionados en el Repositorio:
 * 🌐 [Regresar al README Principal del Repositorio](../../README.md)
 * 🧪 [Ejecutar Laboratorio de Álgebra Lineal en Colab (Notebook 01)](../../notebooks/01_Algebra_Lineal.ipynb)
 * 🏭 [Consultar Casos de Estudio de Ingeniería](../../docs/casos/)
 
 ---
 
-> [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Matrices Especiales: Algoritmo de Thomas y Cholesky](04_matrices_especiales.md) | [README](../../README.md) | [Casos de estudio](../casos/casos_index.md) |
 

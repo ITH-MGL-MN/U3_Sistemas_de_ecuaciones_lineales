@@ -1,6 +1,19 @@
 # Métodos Iterativos: Gauss-Seidel y Relajación
 
-### 3.1 Fundamento de los Métodos Iterativos
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Descomposición LU e Inversión de Matrices](02_descomposicion_lu.md) | [README](../../README.md) | [Matrices Especiales: Algoritmo de Thomas y Cholesky](04_matrices_especiales.md) |
+
+## 📑 Índice
+
+1. [3.1 Fundamento de los Métodos Iterativos](#sec-3-1)
+2. [3.2 Algoritmo de Gauss-Seidel](#sec-3-2)
+3. [3.3 Condición de Dominancia Diagonal Estricta](#sec-3-3)
+4. [3.4 Mejoramiento de Convergencia con Relajación (SOR)](#sec-3-4)
+5. [3.5 Criterio de Paro por Error Relativo](#sec-3-5)
+6. [🔢 Ejemplo resuelto paso a paso](#sec-ejemplo)
+
+### <a id="sec-3-1"></a>3.1 Fundamento de los Métodos Iterativos
 A diferencia de los métodos directos (Gauss y LU) que modifican la matriz completa mediante eliminaciones $O(n^3)$, los **métodos iterativos** parten de un vector estimado inicial $\mathbf{x}^{(0)}$ y generan una secuencia de aproximaciones $\mathbf{x}^{(1)}, \mathbf{x}^{(2)}, \dots, \mathbf{x}^{(k)}$ hasta satisfacer una tolerancia de error.
 
 **Ventajas clave:**
@@ -9,7 +22,7 @@ A diferencia de los métodos directos (Gauss y LU) que modifican la matriz compl
 
 ---
 
-### 3.2 Algoritmo de Gauss-Seidel
+### <a id="sec-3-2"></a>3.2 Algoritmo de Gauss-Seidel
 
 Dada la ecuación $i$-ésima del sistema $\mathbf{A}\mathbf{x} = \mathbf{b}$:
 
@@ -28,7 +41,7 @@ $$x_i^{(k+1)} = \frac{b_i - \sum_{j=1}^{i-1} a_{ij} x_j^{(k+1)} - \sum_{j=i+1}^n
 
 ---
 
-### 3.3 Condición de Dominancia Diagonal Estricta
+### <a id="sec-3-3"></a>3.3 Condición de Dominancia Diagonal Estricta
 
 Para garantizar que el método de Gauss-Seidel converja a la solución única sin importar el vector inicial $\mathbf{x}^{(0)}$, la matriz $\mathbf{A}$ debe ser **estrictamente diagonalmente dominante por renglones**:
 
@@ -39,7 +52,7 @@ $$|a_{ii}| > \sum_{j=1, j \neq i}^n |a_{ij}|, \quad \forall i \in \{1, 2, \dots,
 
 ---
 
-### 3.4 Mejoramiento de Convergencia con Relajación (SOR)
+### <a id="sec-3-4"></a>3.4 Mejoramiento de Convergencia con Relajación (SOR)
 
 La técnica de **Sobrerrelajación Sucesiva (SOR)** modifica el valor recién calculado por Gauss-Seidel mediante un promedio ponderado con la iteración anterior:
 
@@ -56,7 +69,7 @@ donde $\lambda \in (0, 2)$ es el factor de ponderación:
 
 ---
 
-### 3.5 Criterio de Paro por Error Relativo
+### <a id="sec-3-5"></a>3.5 Criterio de Paro por Error Relativo
 La computación se detiene cuando el error relativo aproximado máximo entre todas las componentes sea menor que la tolerancia porcentual $\varepsilon_s$:
 
 $$\varepsilon_{a, i} = \left| \frac{x_i^{(k+1)} - x_i^{(k)}}{x_i^{(k+1)}} \right| \times 100\% < \varepsilon_s, \quad \forall i = 1, \dots, n$$
@@ -65,7 +78,7 @@ $$\varepsilon_{a, i} = \left| \frac{x_i^{(k+1)} - x_i^{(k)}}{x_i^{(k+1)}} \right
 
 ---
 
-## 🔢 Ejemplo resuelto paso a paso
+### <a id="sec-ejemplo"></a>🔢 Ejemplo resuelto paso a paso
 
 Resolvamos el sistema (diagonal dominante) partiendo de $\mathbf{x}^{(0)} = [0,0,0]^T$:
 
@@ -99,5 +112,7 @@ Converge a $\mathbf{x} = [3,\ -2.5,\ 7]^T$ en pocas iteraciones gracias a la **d
 
 ---
 
-> [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
+| ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
+|:---|:---:|---:|
+| [Descomposición LU e Inversión de Matrices](02_descomposicion_lu.md) | [README](../../README.md) | [Matrices Especiales: Algoritmo de Thomas y Cholesky](04_matrices_especiales.md) |
 

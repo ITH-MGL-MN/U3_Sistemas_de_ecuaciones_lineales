@@ -37,10 +37,10 @@ Haz clic en las insignias para abrir cada cuaderno. *(Enlaces activos tras la Fa
 
 | # | Cuaderno / Actividad | Descripción y Alcance | Enlace Directo |
 |---|---|---|:---:|
-| **01** | **Álgebra Lineal** | Introducción práctica a matrices con `matlab_like` + `robomat` fusionados: construcción de matrices, operaciones de renglón, determinante, inversa y manipulación simbólica. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)]() 🔜 |
-| **02** | **Laboratorios de Métodos** | Laboratorios y prácticas sobre [los 4 métodos](docs/metodos/): Eliminación Gaussiana, LU, Gauss-Seidel y Thomas/Cholesky. Preguntas de opción múltiple y numéricas abiertas, comparación Python vs MATLAB (teórico). | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)]() 🔜 |
-| **03** | **Selección de Equipos y Casos** | Registro del equipo y asignación determinista del Caso de Estudio (T1–T17) mediante la semilla del Número de Control (NC). | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)]() 🔜 |
-| **04** | **Análisis de Caso y Reporte** | Cada método implementado en un archivo `.py`, comparación versión manual vs `numpy`/`scipy`, y exportación de resultados/figuras para el reporte en LaTeX. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)]() 🔜 |
+| **01** | **Álgebra Lineal** | Introducción práctica a matrices con `matlab_like` + `robomat` fusionados: construcción de matrices, operaciones de renglón, determinante, inversa y manipulación simbólica. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1aEIZ7s9Y9HbS9fnOVf3-42uq94VrnVcl) |
+| **02** | **Laboratorios de Métodos** | Laboratorios y prácticas sobre [los 4 métodos](docs/metodos/): Eliminación Gaussiana, LU, Gauss-Seidel y Thomas/Cholesky. Preguntas de opción múltiple y numéricas abiertas, comparación Python vs MATLAB (teórico). | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1eWIoYtyad4EM_7rcUaALZvfZoqwLdh0z) |
+| **03** | **Selección de Equipos y Casos** | Registro del equipo y asignación determinista del Caso de Estudio (T1–T17) mediante la semilla del Número de Control (NC). | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1CM18n8fFl5YmgiNKsCUSQqxRmF-9KbNs) |
+| **04** | **Análisis de Caso y Reporte** | Cada método implementado en un archivo `.py`, comparación versión manual vs `numpy`/`scipy`, y exportación de resultados/figuras para el reporte en LaTeX. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oczPp_-MehZ2mauySE4yYPiorykkFyGG) |
 
 ---
 
