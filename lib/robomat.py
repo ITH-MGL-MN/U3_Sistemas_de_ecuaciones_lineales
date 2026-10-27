@@ -34,8 +34,10 @@ Concatenar como en MATLAB: si dentro de ``M[[...]]`` hay matrices en vez de núm
 se concatenan. ``M[[A, b]]`` = ``[A, b]`` (horizontal), ``M[[A], [B]]`` = ``[A; B]``
 (vertical) y ``M[[A, B], [C, D]]`` = matriz por bloques. Esto evita el problema de
 ``np.array([A, b])``, que produce un arreglo de 3 dimensiones o de objetos.
-También existen ``horzcat``, ``vertcat`` y ``cat(dim, ...)``, y las versiones que
-aceptan símbolos: ``apilar_columnas`` y ``apilar_filas``.
+
+No uses ``c_`` ni ``r_`` de NumPy: fallan con símbolos y anidan en vez de
+concatenar. Si necesitas llamar la operación directamente, están
+``apilar_columnas``/``horzcat`` y ``apilar_filas``/``vertcat``.
 """
 
 # ============================================================
@@ -553,27 +555,24 @@ def apilar_columnas(*bloques):
         return MatrizRobomat(mats[0].row_join(*mats[1:]))
 
     partes = [np.atleast_2d(b).astype(float) for b in bloques]
-    # alto maximo entre los bloques (los vectores de una fila se acuestan)
-    alturas = [p.shape[0] if p.shape[0] != 1 else 1 for p in partes]
+    # alto maximo entre los bloques
+    alturas = [p.shape[0] for p in partes]
     alto = max(alturas)
     piezas = []
-    for b, a in zip(bloques, partes):
-        if a.shape == (1, 1):                      # escalar -> columna de alto
+    for a in partes:
+        if a.shape == (1, 1) and alto > 1:        # escalar -> columna de alto
             piezas.append(np.full((alto, 1), float(a[0, 0])))
-        elif a.shape[0] == 1 and a.shape[1] > 1:   # vector fila -> columna
-            piezas.append(a.T)
         else:
             piezas.append(a)
     return np.hstack(piezas)
 
 
 def _bloque_matriz(x):
-    """Normaliza un bloque suelto a matriz 2-D (vector fila -> columna)."""
+    """Normaliza un bloque suelto a matriz 2-D (sin cambiar su orientación)."""
     if isinstance(x, MatrizRobomat):
         return x
     if isinstance(x, np.ndarray):
-        a = np.atleast_2d(x).astype(float)
-        return a.T if a.shape[0] == 1 and a.shape[1] > 1 else a
+        return np.atleast_2d(x).astype(float)
     if isinstance(x, sym.MatrixBase):
         return MatrizRobomat(x)
     return sym.Matrix([[x]])
