@@ -24,8 +24,8 @@ evaluacion:
   accion: "guardar"             # acción por defecto del webhook
   # ⚠️ REEMPLAZAR por los valores reales al desplegar el Apps Script de U3
   #     (corre setupWebhookToken() y pega aquí el token y la URL /exec).
-  webhook_token: "<WEBHOOK_TOKEN_U3>"
-  apps_script_url: "https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec"
+  webhook_token: "43f6f220-fc6e-4972-a69e-a11b54a629ec"
+  apps_script_url: "https://script.google.com/macros/s/AKfycbzD5k2BVwJ6pHjBgbc3-f1pbV9zrX0AloZfPiCyHSrsRZ7Kfno6ZQOnqzEbTikVlO6lRQ/exec"
 
 # Asignación determinista de casos por equipo (espejo de la lógica del
 # Cuaderno 03): el tamaño del equipo define el bloque, y la suma de los
