@@ -95,5 +95,33 @@ $$\frac{\|\Delta \mathbf{x}\|}{\|\mathbf{x}\|} \le \text{Cond}(\mathbf{A}) \cdot
 
 ---
 
+## 🔢 Ejemplo resuelto paso a paso
+
+Factorizamos la misma matriz del ejemplo de Gauss por **Doolittle**:
+
+$$\mathbf{A} = \begin{bmatrix} 3 & -0.1 & -0.2 \\ 0.1 & 7 & -0.3 \\ 0.3 & -0.2 & 10 \end{bmatrix}$$
+
+**Paso $k=1$:** $U_{1,:} = [3,\ -0.1,\ -0.2]$. Los multiplicadores forman la columna de $\mathbf{L}$:
+
+$$l_{21} = \frac{0.1}{3} = 0.0333, \qquad l_{31} = \frac{0.3}{3} = 0.1$$
+
+**Paso $k=2$:** $U_{2,:} = [0,\ 7.00333,\ -0.29333]$ y $l_{32} = -0.19/7.00333 = -0.02713$.
+
+**Paso $k=3$:** $U_{3,:} = [0,\ 0,\ 10.0120]$.
+
+Resultado:
+
+$$\mathbf{L} = \begin{bmatrix} 1 & 0 & 0 \\ 0.0333 & 1 & 0 \\ 0.1 & -0.02713 & 1 \end{bmatrix}, \qquad \mathbf{U} = \begin{bmatrix} 3 & -0.1 & -0.2 \\ 0 & 7.00333 & -0.29333 \\ 0 & 0 & 10.0120 \end{bmatrix}$$
+
+Comprobamos $\mathbf{A} = \mathbf{L}\mathbf{U}$ multiplicando. Para resolver $\mathbf{A}\mathbf{x}=\mathbf{b}$:
+
+**Sustitución hacia adelante** ($\mathbf{L}\mathbf{d}=\mathbf{b}$): $d_1 = 7.85$, $d_2 = -19.5617$, $d_3 = 70.0843$.
+
+**Sustitución hacia atrás** ($\mathbf{U}\mathbf{x}=\mathbf{d}$): $\mathbf{x} = [3,\ -2.5,\ 7]^T$.
+
+> 💡 **¿Para qué sirve?** Si tienes que resolver el sistema con **muchos** vectores $\mathbf{b}$ distintos (misma matriz $\mathbf{A}$), factorizas una sola vez ($O(n^3)$) y cada solución nueva cuesta solo $O(n^2)$.
+
+---
+
 > [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
 

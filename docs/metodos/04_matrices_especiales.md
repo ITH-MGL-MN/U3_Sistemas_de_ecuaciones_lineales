@@ -79,5 +79,35 @@ Para el renglón $k \in \{1, 2, \dots, n\}$:
 
 ---
 
+## 🔢 Ejemplo resuelto: Algoritmo de Thomas
+
+Sistema tridiagonal (p. ej. conducción térmica 1D o masa-resorte):
+
+$$\begin{bmatrix} 2 & -1 & 0 \\ -1 & 2 & -1 \\ 0 & -1 & 2 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \\ 1 \end{bmatrix}$$
+
+con diagonal $f=[2,2,2]$, subdiagonal $e=[\cdot,-1,-1]$, superdiagonal $g=[-1,-1,\cdot]$.
+
+**Fase 1 (descomposición + sustitución adelante):**
+
+$$k=1:\quad f_2' = 2 - \tfrac{-1}{2}(-1) = 1.5, \quad r_2' = 0 - \tfrac{-1}{2}(1) = 0.5$$
+
+$$k=2:\quad f_3' = 2 - \tfrac{-1}{1.5}(-1) = 1.3333, \quad r_3' = 1 - \tfrac{-1}{1.5}(0.5) = 1.3333$$
+
+**Fase 2 (sustitución hacia atrás):**
+
+$$x_3 = \frac{1.3333}{1.3333} = 1, \quad x_2 = \frac{0.5 - (-1)(1)}{1.5} = 1, \quad x_1 = \frac{1 - (-1)(1)}{2} = 1$$
+
+**Solución:** $\mathbf{x} = [1,\ 1,\ 1]^T$ en $O(n)$ operaciones. ✅
+
+## 🔢 Ejemplo resuelto: Cholesky
+
+Para una matriz **simétrica definida positiva** $\mathbf{A} = \begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix}$:
+
+$$l_{11} = \sqrt{4} = 2, \qquad l_{21} = \frac{2}{2} = 1, \qquad l_{22} = \sqrt{3 - 1^2} = \sqrt{2}$$
+
+$$\mathbf{L} = \begin{bmatrix} 2 & 0 \\ 1 & \sqrt{2} \end{bmatrix}, \qquad \mathbf{A} = \mathbf{L}\mathbf{L}^T$$
+
+---
+
 > [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
 

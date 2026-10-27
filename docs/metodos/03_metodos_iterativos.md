@@ -65,5 +65,39 @@ $$\varepsilon_{a, i} = \left| \frac{x_i^{(k+1)} - x_i^{(k)}}{x_i^{(k+1)}} \right
 
 ---
 
+## 🔢 Ejemplo resuelto paso a paso
+
+Resolvamos el sistema (diagonal dominante) partiendo de $\mathbf{x}^{(0)} = [0,0,0]^T$:
+
+$$\begin{bmatrix} 3 & -0.1 & -0.2 \\ 0.1 & 7 & -0.3 \\ 0.3 & -0.2 & 10 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix} = \begin{bmatrix} 7.85 \\ -19.3 \\ 71.4 \end{bmatrix}$$
+
+**Iteración 1** (despejando y usando los valores recién calculados):
+
+$$x_1 = \frac{7.85}{3} = 2.6167$$
+
+$$x_2 = \frac{-19.3 - 0.1(2.6167)}{7} = -2.7945$$
+
+$$x_3 = \frac{71.4 - 0.3(2.6167) + 0.2(-2.7945)}{10} = 7.0056$$
+
+**Iteración 2:**
+
+$$x_1 = \frac{7.85 + 0.1(-2.7945) + 0.2(7.0056)}{3} = 2.9906$$
+
+$$x_2 = \frac{-19.3 - 0.1(2.9906) + 0.3(7.0056)}{7} = -2.4996$$
+
+$$x_3 = \frac{71.4 - 0.3(2.9906) + 0.2(-2.4996)}{10} = 7.0003$$
+
+| Iteración | $x_1$ | $x_2$ | $x_3$ | Error relativo máx. |
+|---|---:|---:|---:|---:|
+| 1 | 2.6167 | -2.7945 | 7.0056 | — |
+| 2 | 2.9906 | -2.4996 | 7.0003 | 13.1% |
+| 3 | 3.0000 | -2.5000 | 7.0000 | 0.02% |
+
+Converge a $\mathbf{x} = [3,\ -2.5,\ 7]^T$ en pocas iteraciones gracias a la **dominancia diagonal**. ✅
+
+> ⚠️ Si la matriz **no** es diagonal dominante, Gauss-Seidel puede **divergir**. Reordena los renglones o usa un método directo.
+
+---
+
 > [📚 Volver al README](../../README.md) · [🏭 Casos de estudio](../casos/casos_index.md)
 
