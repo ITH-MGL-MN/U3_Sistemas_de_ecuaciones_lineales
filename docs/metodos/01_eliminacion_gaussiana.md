@@ -325,39 +325,141 @@ $$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & \tfrac{1}{2} & \tfrac{1}{2} \\ 
 
 ### <a id="sec-1-3"></a>1.3 Estrategia de Pivoteo Parcial Por Renglón
 
-**📘 Teoría.** La eliminación simple falla de dos maneras: si $a_{kk}^{(k)} = 0$ el multiplicador $m_{ik}$ no existe, y si $|a_{kk}^{(k)}|$ es muy pequeño el multiplicador se vuelve enorme y amplifica los errores de redondeo de todo lo que sigue.
+**📘 Teoría.**
 
-El **pivoteo parcial** evita ambas cosas eligiendo como pivote el elemento de mayor magnitud en la columna $k$, desde el renglón $k$ hasta el $n$:
+El subtema 1.2 supuso que todos los pivotes son distintos de cero. Eso no siempre
+se cumple, y cuando falla el método se rompe. Hay dos maneras de fallar.
 
-$$p = \arg\max_{i = k, \dots, n} \left| a_{ik}^{(k)} \right|.$$
+#### Falla 1: un pivote igual a cero
 
-Si $p \neq k$ se intercambia el renglón $k$ completo con el renglón $p$, es decir $R_k \leftrightarrow R_p$, y recién entonces se calculan los multiplicadores.
+Recordemos que el multiplicador es $m_{ik} = a_{ik}/a_{kk}$. Si el pivote vale
+cero, se divide entre cero y el método **no puede continuar**. Por ejemplo:
 
-Cada intercambio cambia el signo del determinante, de modo que
+$$
+\begin{aligned}
+0\,x_1 + x_2 &= 1\\
+x_1 + x_2 &= 3
+\end{aligned}
+\qquad\Longrightarrow\qquad
+m_{21} = \frac{1}{0} \;\; \text{(no existe).}
+$$
 
-$$\det(\mathbf{A}) = (-1)^{p_{\text{swaps}}} \prod_{k=1}^{n} u_{kk},$$
+Lo importante es notar que **el sistema sí tiene solución** ($x_1 = 2$, $x_2 = 1$);
+lo que falla es el **orden** en que se escribieron las ecuaciones. Si se
+intercambian, el pivote pasa a ser $1$ y el método avanza sin problema.
 
-donde $p_{\text{swaps}}$ es el número total de intercambios realizados.
+#### Falla 2: un pivote muy pequeño (pero distinto de cero)
 
-**🧮 Ejemplo algebraico.** Para una matriz $2\times 2$ el criterio compara solo dos candidatos. Si $|a_{21}| > |a_{11}|$ se elige $p = 2$ y se intercambian los renglones:
+Este caso es más peligroso porque **no da error**: entrega un resultado creíble y
+equivocado. Supongamos
 
-$$\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ a_{21} & a_{22} & \mid & b_2 \end{bmatrix}
+$$
+\begin{aligned}
+10^{-18}\,x_1 + x_2 &= 1\\
+x_1 + x_2 &= 2
+\end{aligned}
+$$
+
+cuya solución verdadera es $x_1 \approx 1$, $x_2 \approx 1$. El pivote es
+$a_{11} = 10^{-18}$, pequeño pero válido, así que el método procede:
+
+$$m_{21} = \frac{1}{10^{-18}} = 10^{18}.$$
+
+Un multiplicador **un billón de veces más grande** que los datos originales. Al
+restar $R_2 \leftarrow R_2 - 10^{18}R_1$:
+
+- coeficiente de $x_2$: $1 - 10^{18}(1) = -10^{18}$
+- lado derecho: $2 - 10^{18}(1) = -10^{18}$
+
+De ahí $x_2 = \dfrac{-10^{18}}{-10^{18}} = 1$, que sale bien. Pero al despejar
+$x_1$:
+
+$$x_1 = \frac{1 - x_2}{10^{-18}} = \frac{1 - 1}{10^{-18}} = \frac{0}{10^{-18}} = 0,$$
+
+cuando debía dar $x_1 \approx 1$. **El resultado está completamente mal.**
+
+El motivo es que al calcular $1 - x_2$ se restan dos números casi iguales: el
+valor verdadero de la diferencia es del orden de $10^{-18}$, más pequeño que la
+precisión con que se representan esos números. Se pierden **todos** los dígitos
+significativos y la resta devuelve cero. Después, dividir ese cero entre
+$10^{-18}$ no recupera nada.
+
+Con pivoteo, en cambio, se intercambian los renglones, el pivote pasa a ser $1$,
+los multiplicadores quedan pequeños y el resultado es $x_1 = x_2 = 1$: correcto.
+
+#### La estrategia: elegir el mayor de la columna
+
+El **pivoteo parcial** consiste en no aceptar el pivote que toca por posición,
+sino **elegir el de mayor magnitud** de la columna. Antes de eliminar en el paso
+$k$ se busca
+
+$$p = \arg\max_{i = k,\, k+1,\, \dots,\, n} \left| a_{ik}^{(k)} \right|,$$
+
+es decir, el renglón $p$ donde el coeficiente de la columna $k$ es el más grande
+en valor absoluto. Si $p \neq k$, se intercambian los renglones completos:
+
+$$R_k \longleftrightarrow R_p.$$
+
+Recién entonces se calculan los multiplicadores.
+
+#### Por qué esto resuelve el problema
+
+Después del intercambio, el pivote es el mayor de su columna, así que para
+cualquier otro renglón
+
+$$|m_{ik}| = \left| \frac{a_{ik}}{a_{kk}} \right| \le 1.$$
+
+Los multiplicadores ya **no amplifican** nada: restar $m_{ik}$ veces un renglón
+resta una cantidad del mismo orden de magnitud que el renglón mismo, y los
+errores de redondeo no se multiplican. Además, el intercambio garantiza que el
+pivote no sea cero (salvo que la columna entera sea cero, y en ese caso el
+sistema no tiene solución única).
+
+> 💡 En la práctica **casi todos los programas hacen pivoteo siempre**, aunque el
+> pivote parezca aceptable. Cuesta muy poco y evita los dos problemas a la vez.
+
+#### Efecto sobre el determinante
+
+Cada intercambio de renglones cambia el signo del determinante, pero no su valor
+absoluto. Por eso, contando los intercambios $p_{\text{swaps}}$:
+
+$$\det(\mathbf{A}) = (-1)^{p_{\text{swaps}}} \prod_{k=1}^{n} u_{kk}.$$
+
+**🧮 Ejemplo algebraico.** Para una matriz $2\times2$ el criterio compara solo dos
+candidatos. Si $|a_{21}| > |a_{11}|$ se elige $p = 2$ y se intercambian los
+renglones:
+
+$$
+\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ a_{21} & a_{22} & \mid & b_2 \end{bmatrix}
 \;\xrightarrow{R_1 \leftrightarrow R_2}\;
-\begin{bmatrix} a_{21} & a_{22} & \mid & b_2 \\ a_{11} & a_{12} & \mid & b_1 \end{bmatrix}.$$
+\begin{bmatrix} a_{21} & a_{22} & \mid & b_2 \\ a_{11} & a_{12} & \mid & b_1 \end{bmatrix}.
+$$
 
-El nuevo pivote es $a_{21}$ y el determinante cambia de signo una vez: $\det(\mathbf{A}) = (-1)^{1} u_{11}u_{22}$.
+El nuevo pivote es $a_{21}$ y el determinante cambia de signo una vez:
+$\det(\mathbf{A}) = (-1)^{1} u_{11}u_{22}$.
 
 **🔢 Versión con enteros (paso a paso).** Sistema
 
-$$\mathbf{A} = \begin{bmatrix} 0 & 1 \\ 1 & 1 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 1 \\ 3 \end{bmatrix}.$$
+$$\mathbf{A} = \begin{bmatrix} 0 & 1 \\ 1 & 1 \end{bmatrix},
+\qquad \mathbf{b} = \begin{bmatrix} 1 \\ 3 \end{bmatrix}.$$
 
-1. Se revisa la columna 1: los candidatos son $|a_{11}| = 0$ y $|a_{21}| = 1$.
-2. Como $p = 2 \neq 1$, el pivote $a_{11} = 0$ obliga a intercambiar.
-3. Se aplica $R_1 \leftrightarrow R_2$ y queda
+1. **Se revisa la columna 1.** Los candidatos son $|a_{11}| = 0$ y $|a_{21}| = 1$.
+2. **Se elige el mayor:** $p = 2$, porque $1 > 0$. El pivote $a_{11} = 0$ haría
+   imposible calcular $m_{21}$, así que hay que intercambiar.
+3. **Se aplica $R_1 \leftrightarrow R_2$:**
 
-$$\mathbf{A} = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}.$$
+$$\mathbf{A} = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix},
+\qquad \mathbf{b} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}.$$
 
-4. Ahora el pivote es $1$, distinto de cero, y hubo un intercambio, así que el determinante lleva factor $(-1)^1$.
+4. **Ahora el pivote es $1$**, distinto de cero, y se puede eliminar:
+   $m_{21} = 0/1 = 0$. Restar cero veces el renglón 1 no cambia nada, así que la
+   matriz ya quedó triangular.
+5. **Solución** (se detalla en el subtema 1.4): de la última ecuación
+   $1\cdot x_2 = 1$ se obtiene $x_2 = 1$; y del primer renglón,
+   $x_1 + x_2 = 3 \Rightarrow x_1 = 2$.
+6. **Comprobación:** $\mathbf{x} = [2,\ 1]$ satisface el sistema original
+   ($0(2) + 1 = 1$ ✓ y $2 + 1 = 3$ ✓). Hubo un intercambio, así que
+   $\det(\mathbf{A}) = (-1)^1 u_{11}u_{22} = -(1)(1) = -1$.
 
 ---
 
