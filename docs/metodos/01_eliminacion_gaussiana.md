@@ -80,21 +80,24 @@ ecuaciones**. Eso permite separar los datos (los números) de las incógnitas
    independientes** $\mathbf{b}$.
 
 $$
-\underbrace{\begin{bmatrix}
+\begin{bmatrix}
 a_{11} & a_{12} & \cdots & a_{1n} \\
 a_{21} & a_{22} & \cdots & a_{2n} \\
 \vdots & \vdots & \ddots & \vdots \\
 a_{n1} & a_{n2} & \cdots & a_{nn}
-\end{bmatrix}}_{\mathbf{A}\;(n\times n)}
-\;
-\underbrace{\begin{bmatrix}
+\end{bmatrix}
+\begin{bmatrix}
 x_1 \\ x_2 \\ \vdots \\ x_n
-\end{bmatrix}}_{\mathbf{x}\;(n\times 1)}
-=
-\underbrace{\begin{bmatrix}
+\end{bmatrix}
+= \begin{bmatrix}
 b_1 \\ b_2 \\ \vdots \\ b_n
-\end{bmatrix}}_{\mathbf{b}\;(n\times 1)}
+\end{bmatrix}
 $$
+
+donde el primer factor es la **matriz de coeficientes** $\mathbf{A}$, de tamaño
+$n\times n$; el segundo es el **vector de incógnitas** $\mathbf{x}$, de tamaño
+$n\times 1$; y el lado derecho es el **vector de términos independientes**
+$\mathbf{b}$, también de $n\times 1$.
 
 es decir,
 
@@ -108,13 +111,11 @@ ecuación**. Con un caso $2\times 2$ se ve sin lugar a dudas:
 $$
 \begin{bmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{bmatrix}
 \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}
-=
-\begin{bmatrix}
+= \begin{bmatrix}
 a_{11}x_1 + a_{12}x_2 \\
 a_{21}x_1 + a_{22}x_2
 \end{bmatrix}
-=
-\begin{bmatrix} b_1 \\ b_2 \end{bmatrix}.
+= \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}.
 $$
 
 El primer renglón del resultado es exactamente la primera ecuación de la forma
