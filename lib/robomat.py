@@ -328,26 +328,58 @@ M = _CreadorMatriz()
 I = _CreadorIdentidad()
 
 
+def _a_exacto(e):
+    """Convierte un Float a Integer o Rational exacto.
+
+    La tolerancia es absoluta (1e-10) para reconocer fracciones "obvias" como
+    0.1 -> 1/10 o 7.85 -> 157/20. Además se exige que la fracción tenga una
+    magnitud comparable a la del número original: así 1e-18 NO se convierte en
+    cero, que sería destructivo.
+    """
+    if not getattr(e, "is_Float", False):
+        return e
+    v = float(e)
+    if v.is_integer():
+        return sym.Integer(int(v))
+    r = sym.nsimplify(e, rational=True, tolerance=1e-10)
+    if not r.is_Rational or r == 0:
+        return e
+    razon = abs(float(r)) / abs(v)
+    return r if 0.1 <= razon <= 10 else e
+
+
+def _matriz_exacta(datos):
+    """Matriz simbólica a partir de listas, con los números en forma exacta."""
+    return sym.Matrix(datos).applyfunc(_a_exacto)
+
+
 def var(*args):
     """Crea símbolos o convierte a simbólico, según el tipo de entrada.
 
     - ``var('q1', 'q2')``        -> crea variables simbólicas
     - ``var(A)``                 -> convierte la matriz A (NumPy o lista) a simbólica
-    - ``var(2)``                 -> convierte un número a entero simbólico
+    - ``var(2.5)``               -> convierte un número a su forma exacta
 
-    Como en MATLAB con ``sym(A)``: la misma función sirve para las dos cosas,
-    y decide sola mirando lo que recibe.
+    Al convertir, los números pasan a su forma exacta: ``1.0`` se vuelve ``1``,
+    ``0.1`` se vuelve ``1/10`` y ``7.85`` se vuelve ``157/20``. Así el álgebra
+    simbólica trabaja sin errores de redondeo. Los valores demasiado pequeños
+    (como ``1e-18``) se dejan como flotantes para no destruirlos.
+
+    Como ``sym(A)`` en MATLAB: la misma función sirve para las dos cosas y
+    decide sola mirando lo que recibe.
     """
     if len(args) == 1 and not isinstance(args[0], str):
         dato = args[0]
         if isinstance(dato, MatrizRobomat):
-            return dato
+            return MatrizRobomat(dato.applyfunc(_a_exacto))
         if isinstance(dato, sym.MatrixBase):
-            return MatrizRobomat(dato)
+            return MatrizRobomat(dato.applyfunc(_a_exacto))
         if isinstance(dato, np.ndarray):
-            return MatrizRobomat(sym.Matrix(dato.tolist()))
+            return MatrizRobomat(_matriz_exacta(dato.tolist()))
         if isinstance(dato, (list, tuple)):
-            return MatrizRobomat(sym.Matrix(dato))
+            return MatrizRobomat(_matriz_exacta(dato))
+        if isinstance(dato, float):
+            return _a_exacto(sym.Float(dato))
         return sym.sympify(dato)
     if not all(isinstance(a, str) for a in args):
         raise TypeError("var() espera nombres ('x', 'y'), una matriz o un número")
