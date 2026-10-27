@@ -175,43 +175,151 @@ $$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}, \qquad \mathbf{b} =
 
 ### <a id="sec-1-2"></a>1.2 Eliminación Hacia Adelante (*Forward Elimination*)
 
-**📘 Teoría.** Esta fase convierte $\mathbf{A}$ en una matriz **triangular superior** $\mathbf{U}$, es decir, deja ceros debajo de la diagonal. Para cada pivote $k = 1, 2, \dots, n-1$ y cada renglón $i = k+1, \dots, n$ se calcula el **multiplicador**
+**📘 Teoría.**
 
-$$m_{ik} = \frac{a_{ik}^{(k)}}{a_{kk}^{(k)}}$$
+#### La idea: eliminar incógnitas una por una
 
-y se actualizan el renglón y el lado derecho con
+En álgebra elemental un sistema se resuelve **eliminando** incógnitas: se toma
+una ecuación, se multiplica por un número conveniente y se le resta a otra para
+que una incógnita desaparezca. Con dos ecuaciones,
 
-$$a_{ij}^{(k+1)} = a_{ij}^{(k)} - m_{ik}\,a_{kj}^{(k)}, \qquad b_i^{(k+1)} = b_i^{(k)} - m_{ik}\,b_k^{(k)}.$$
+$$
+\begin{aligned}
+a_{11}x_1 + a_{12}x_2 &= b_1 &&\text{(ecuación 1)}\\
+a_{21}x_1 + a_{22}x_2 &= b_2 &&\text{(ecuación 2)}
+\end{aligned}
+$$
 
-Al terminar el ciclo queda $[\mathbf{U}\mid\mathbf{d}]$ triangular superior. En esta sección **no hay pivoteo**: se supone que todos los pivotes son distintos de cero. Para la matriz de abajo los pivotes son $2$, $\tfrac{1}{2}$ y $-1$, todos $\neq 0$, así que la eliminación simple es válida.
+si se multiplica la ecuación 1 por $\frac{a_{21}}{a_{11}}$ y se le resta a la
+ecuación 2, la incógnita $x_1$ desaparece de la segunda:
 
-**🧮 Ejemplo algebraico.** En un sistema $2\times 2$ solo hay un paso:
+$$\left(a_{21} - \frac{a_{21}}{a_{11}}a_{11}\right)x_1
++ \left(a_{22} - \frac{a_{21}}{a_{11}}a_{12}\right)x_2
+= b_2 - \frac{a_{21}}{a_{11}}b_1,$$
 
-$$m_{21} = \frac{a_{21}}{a_{11}}, \qquad a_{22}' = a_{22} - m_{21}a_{12}, \qquad b_2' = b_2 - m_{21}b_1.$$
+es decir
 
-Aplicando $R_2 \leftarrow R_2 - m_{21}R_1$ la matriz aumentada pasa de
+$$0\cdot x_1 + a_{22}'\,x_2 = b_2',
+\qquad a_{22}' = a_{22} - \frac{a_{21}}{a_{11}}a_{12},
+\qquad b_2' = b_2 - \frac{a_{21}}{a_{11}}b_1.$$
 
-$$\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ a_{21} & a_{22} & \mid & b_2 \end{bmatrix}
+La ecuación 2 quedó con **una sola incógnita** y ya se puede despejar.
+
+#### Por qué esa resta es legal
+
+Multiplicar una ecuación por una constante y restársela a otra **no cambia la
+solución**: si un vector $\mathbf{x}$ cumple las dos ecuaciones originales,
+también cumple cualquier combinación de ellas, y viceversa. Se reemplaza una
+ecuación por otra equivalente, sin perder información. Es exactamente el mismo
+argumento que se usa en álgebra elemental.
+
+#### El pivote y el multiplicador
+
+El número entre el que se divide, $a_{11}$ en el ejemplo, se llama **pivote**: es
+el coeficiente de la incógnita que se va a eliminar. El factor que se resta se
+llama **multiplicador**:
+
+$$m_{ik} = \frac{a_{ik}^{(k)}}{a_{kk}^{(k)}}.$$
+
+El subíndice $k$ dice **qué incógnita** se elimina en ese paso y la $i$,
+**de qué renglón** se elimina. El pivote es entonces $a_{kk}$, el elemento de la
+diagonal del renglón $k$. Debe cumplir $a_{kk} \neq 0$ porque está en un
+denominador.
+
+#### El algoritmo con $n$ ecuaciones
+
+El mismo paso se repite para cada columna $k = 1, 2, \dots, n-1$:
+
+1. **Tomar el pivote** $a_{kk}^{(k)}$ del renglón $k$.
+2. Para cada renglón de abajo, $i = k+1, \dots, n$, calcular su multiplicador
+   $m_{ik} = a_{ik}^{(k)}/a_{kk}^{(k)}$.
+3. **Restar** $m_{ik}$ veces el renglón $k$ al renglón $i$, en **todos** los
+   coeficientes desde la columna $k$ hasta la $n$, y también en $\mathbf{b}$:
+
+$$a_{ij}^{(k+1)} = a_{ij}^{(k)} - m_{ik}\,a_{kj}^{(k)},
+\qquad b_i^{(k+1)} = b_i^{(k)} - m_{ik}\,b_k^{(k)}.$$
+
+El superíndice $(k)$ significa "el valor que tiene en el paso $k$": los números
+van cambiando de un paso al siguiente.
+
+#### Qué se logra: forma triangular
+
+Al terminar, todo lo que está **debajo de la diagonal** quedó en cero:
+
+$$
+[\mathbf{U}\mid\mathbf{d}] = \begin{bmatrix}
+u_{11} & u_{12} & \cdots & u_{1n} & \mid & d_1 \\
+0 & u_{22} & \cdots & u_{2n} & \mid & d_2 \\
+\vdots & \vdots & \ddots & \vdots & \mid & \vdots \\
+0 & 0 & \cdots & u_{nn} & \mid & d_n
+\end{bmatrix}.
+$$
+
+Eso es lo que se buscaba, porque la **última** ecuación ya tiene una sola
+incógnita ($u_{nn}x_n = d_n$): se despeja de inmediato y luego se sube renglón
+por renglón. De eso se encarga el subtema 1.4.
+
+> ⚠️ En este subtema se supone que **todos los pivotes son distintos de cero**.
+> Si alguno vale cero o es muy pequeño, hace falta lo del subtema 1.3 (pivoteo).
+
+**🧮 Ejemplo algebraico.** En un sistema $2\times2$ hay un solo paso. El pivote es
+$a_{11}$ y el multiplicador $m_{21} = a_{21}/a_{11}$. Al restar
+$R_2 \leftarrow R_2 - m_{21}R_1$ la matriz aumentada pasa de
+
+$$
+\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ a_{21} & a_{22} & \mid & b_2 \end{bmatrix}
 \quad\longrightarrow\quad
-\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ 0 & a_{22}' & \mid & b_2' \end{bmatrix},$$
+\begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ 0 & a_{22}' & \mid & b_2' \end{bmatrix},
+$$
 
-y la segunda ecuación queda $a_{22}'x_2 = b_2'$, ya despejable.
+donde $a_{22}' = a_{22} - m_{21}a_{12}$ y $b_2' = b_2 - m_{21}b_1$. La segunda
+ecuación queda $a_{22}'x_2 = b_2'$, ya despejable.
 
 **🔢 Versión con enteros (paso a paso).** Sistema
 
-$$\mathbf{A} = \begin{bmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 8 \\ -11 \\ -3 \end{bmatrix}.$$
+$$\mathbf{A} = \begin{bmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{bmatrix},
+\qquad \mathbf{b} = \begin{bmatrix} 8 \\ -11 \\ -3 \end{bmatrix}.$$
 
-1. **Paso $k=1$.** Multiplicadores: $m_{21} = -3/2$ y $m_{31} = -1$.
-2. Se aplican $R_2 \leftarrow R_2 - m_{21}R_1$ y $R_3 \leftarrow R_3 - m_{31}R_1$, con lo que la matriz aumentada queda
+1. **Matriz aumentada de partida:**
 
-$$\begin{bmatrix} 2 & 1 & -1 & \mid & 8 \\ 0 & 1/2 & 1/2 & \mid & 1 \\ 0 & 2 & 1 & \mid & 5 \end{bmatrix}.$$
+$$[\mathbf{A}\mid\mathbf{b}] = \begin{bmatrix}
+2 & 1 & -1 & \mid & 8 \\
+-3 & -1 & 2 & \mid & -11 \\
+-2 & 1 & 2 & \mid & -3
+\end{bmatrix}.$$
 
-3. **Paso $k=2$.** Multiplicador: $m_{32} = 4$.
-4. Se aplica $R_3 \leftarrow R_3 - m_{32}R_2$ y se llega a
+2. **Paso $k=1$: eliminar $x_1$ de los renglones 2 y 3.** El pivote es
+   $a_{11} = 2 \neq 0$.
 
-$$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & 1/2 & 1/2 \\ 0 & 0 & -1 \end{bmatrix}, \qquad \mathbf{d} = \begin{bmatrix} 8 \\ 1 \\ 1 \end{bmatrix}.$$
+   - Renglón 2: $m_{21} = \dfrac{-3}{2}$. Como $R_2 - m_{21}R_1 = R_2 + \tfrac{3}{2}R_1$,
+     se calcula primero $\tfrac{3}{2}R_1 = \left(3,\ \tfrac{3}{2},\ -\tfrac{3}{2} \mid 12\right)$
+     y luego
+     $$R_2 + \tfrac{3}{2}R_1 = \left(0,\ \tfrac{1}{2},\ \tfrac{1}{2} \mid 1\right).$$
+   - Renglón 3: $m_{31} = \dfrac{-2}{2} = -1$. Como $R_3 - m_{31}R_1 = R_3 + R_1$,
+     $$R_3 + R_1 = \left(0,\ 2,\ 1 \mid 5\right).$$
 
-5. Los pivotes usados son $2$, $\tfrac{1}{2}$ y $-1$: ninguno es cero, la eliminación no se detuvo.
+   La matriz queda
+
+$$[\mathbf{A}^{(1)}\mid\mathbf{b}^{(1)}] = \begin{bmatrix}
+2 & 1 & -1 & \mid & 8 \\
+0 & \tfrac{1}{2} & \tfrac{1}{2} & \mid & 1 \\
+0 & 2 & 1 & \mid & 5
+\end{bmatrix}.$$
+
+3. **Paso $k=2$: eliminar $x_2$ del renglón 3.** El pivote ahora es
+   $a_{22} = \tfrac{1}{2} \neq 0$ y
+   $m_{32} = \dfrac{2}{1/2} = 4$. Con $4R_2 = \left(0,\ 2,\ 2 \mid 4\right)$,
+
+   $$R_3 - 4R_2 = \left(0,\ 0,\ -1 \mid 1\right).$$
+
+4. **Resultado: la matriz quedó triangular superior.**
+
+$$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & \tfrac{1}{2} & \tfrac{1}{2} \\ 0 & 0 & -1 \end{bmatrix},
+\qquad \mathbf{d} = \begin{bmatrix} 8 \\ 1 \\ 1 \end{bmatrix}.$$
+
+5. **Comprobación:** los pivotes usados fueron $2$, $\tfrac{1}{2}$ y $-1$. Ninguno
+   es cero, así que la eliminación corrió completa. La solución
+   $\mathbf{x} = [2,\ 3,\ -1]$ se obtiene en el subtema 1.4.
 
 ---
 
