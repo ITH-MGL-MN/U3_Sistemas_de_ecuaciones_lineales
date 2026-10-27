@@ -11,128 +11,187 @@
 3. [2.3 Variantes de Factorización](#sec-2-3)
 4. [2.4 Cálculo Eficiente de la Matriz Inversa $\mathbf{A}^{-1}$](#sec-2-4)
 5. [2.5 Condicionamiento del Sistema y Normas Matriciales](#sec-2-5)
-6. [🔢 Ejemplo resuelto paso a paso](#sec-ejemplo)
 
 ### <a id="sec-2-1"></a>2.1 Motivación e Idea Central
-En muchas aplicaciones de ingeniería (ej. análisis de circuitos o estructuras sujetas a múltiples combinaciones de carga), es necesario resolver $\mathbf{A}\mathbf{x} = \mathbf{b}$ para **múltiples vectores independientes $\mathbf{b}$** manteniendo la misma matriz de estructura $\mathbf{A}$.
 
-La Eliminación Gaussiana estándar repite el trabajo pesado $O(n^3)$ para cada nuevo vector $\mathbf{b}$. La **descomposición LU** separa el trabajo computacional:
-1. **Factorización ($O(n^3)$):** Descompone la matriz $\mathbf{A}$ en dos matrices triangulares tal que $\mathbf{A} = \mathbf{L}\mathbf{U}$.
-2. **Sustitución ($O(n^2)$):** Resuelve el sistema para cualquier vector $\mathbf{b}$ en tiempo cuadrático mediante sustituciones hacia adelante y hacia atrás.
+**📘 Teoría.** En muchas aplicaciones hay que resolver $\mathbf{A}\mathbf{x} = \mathbf{b}$ con la **misma** matriz $\mathbf{A}$ y muchos vectores $\mathbf{b}$ distintos (por ejemplo, varias combinaciones de carga sobre la misma estructura). Hacer eliminación gaussiana completa para cada $\mathbf{b}$ repite el trabajo pesado cada vez.
+
+La descomposición LU separa ese trabajo en dos etapas mediante la factorización
+
+$$\mathbf{A} = \mathbf{L}\mathbf{U},$$
+
+con $\mathbf{L}$ triangular inferior y $\mathbf{U}$ triangular superior. Una vez factorizada la matriz, el costo es $O(n^{3})$ **una sola vez** y después $O(n^{2})$ por cada nuevo $\mathbf{b}$.
+
+**🧮 Ejemplo algebraico.** Para una matriz $2\times 2$ la factorización tiene una forma cerrada: buscando $\mathbf{L}$ con unos en la diagonal,
+
+$$\begin{bmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{bmatrix} =
+\begin{bmatrix} 1 & 0 \\ m_{21} & 1 \end{bmatrix}
+\begin{bmatrix} u_{11} & u_{12} \\ 0 & u_{22} \end{bmatrix},$$
+
+e igualando entrada por entrada se obtiene
+
+$$u_{11} = a_{11}, \qquad u_{12} = a_{12}, \qquad m_{21} = \frac{a_{21}}{a_{11}}, \qquad u_{22} = a_{22} - m_{21}a_{12}.$$
+
+Es decir: $u_{11}$ y $u_{12}$ son el primer renglón de $\mathbf{A}$, y $m_{21}$, $u_{22}$ son exactamente el multiplicador y el pivote actualizado de la eliminación. El sistema se resuelve luego como $\mathbf{L}(\mathbf{U}\mathbf{x}) = \mathbf{b}$, sin volver a tocar $\mathbf{A}$.
+
+**🔢 Versión con enteros (paso a paso).** Se usa la misma matriz del documento anterior:
+
+$$\mathbf{A} = \begin{bmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 8 \\ -11 \\ -3 \end{bmatrix}.$$
+
+1. **Sin LU:** si aparecen dos vectores $\mathbf{b}$ distintos, se hacen **dos eliminaciones** completas, cada una de costo $O(n^{3})$.
+2. **Con LU:** se factoriza una vez y se resuelven **dos sustituciones** por cada $\mathbf{b}$, de costo $O(n^{2})$ cada una.
+3. Con $n=3$ la diferencia es pequeña, pero crece rápido: el ahorro aparece cuando hay muchos lados derechos o $n$ grande.
+4. Para cuantificar el ahorro falta el segundo vector $\mathbf{b}$: **falta: segundo vector $\mathbf{b}$**.
 
 ---
 
 ### <a id="sec-2-2"></a>2.2 Estrategia de Solución en Dos Pasos
 
-Dado el sistema $\mathbf{A}\mathbf{x} = \mathbf{b}$ y la factorización $\mathbf{A} = \mathbf{L}\mathbf{U}$:
+**📘 Teoría.** Con $\mathbf{A} = \mathbf{L}\mathbf{U}$, el sistema $\mathbf{A}\mathbf{x} = \mathbf{b}$ se reescribe como
 
-$$\mathbf{L}\mathbf{U}\mathbf{x} = \mathbf{b}$$
+$$\mathbf{L}\mathbf{U}\mathbf{x} = \mathbf{b}.$$
 
-Definiendo un vector intermedio $\mathbf{d} = \mathbf{U}\mathbf{x}$:
+Se introduce un vector intermedio $\mathbf{y} = \mathbf{U}\mathbf{x}$ y el problema se parte en dos sistemas triangulares:
 
-1. **Paso 1: Sustitución Hacia Adelante (Forward Substitution)**
-   Se resuelve el sistema triangular inferior $\mathbf{L}\mathbf{d} = \mathbf{b}$ para hallar $\mathbf{d}$:
-   $$d_1 = \frac{b_1}{l_{11}}$$
-   $$d_i = \frac{b_i - \sum_{j=1}^{i-1} l_{ij} d_j}{l_{ii}}, \quad \text{para } i = 2, \dots, n$$
+$$\mathbf{L}\mathbf{y} = \mathbf{b} \qquad \text{(sustitución hacia adelante)},$$
+$$\mathbf{U}\mathbf{x} = \mathbf{y} \qquad \text{(sustitución hacia atrás)}.$$
 
-2. **Paso 2: Sustitución Hacia Atrás (Back Substitution)**
-   Se resuelve el sistema triangular superior $\mathbf{U}\mathbf{x} = \mathbf{d}$ para hallar la solución final $\mathbf{x}$:
-   $$x_n = \frac{d_n}{u_{nn}}$$
-   $$x_i = \frac{d_i - \sum_{j=i+1}^n u_{ij} x_j}{u_{ii}}, \quad \text{para } i = n-1, \dots, 1$$
+Como $\mathbf{L}$ es triangular inferior, $\mathbf{y}$ se obtiene de arriba hacia abajo con
+
+$$y_1 = \frac{b_1}{l_{11}}, \qquad y_i = \frac{b_i - \sum_{j=1}^{i-1} l_{ij}y_j}{l_{ii}}, \quad i = 2, \dots, n,$$
+
+y luego $\mathbf{x}$ se obtiene de abajo hacia arriba con
+
+$$x_n = \frac{y_n}{u_{nn}}, \qquad x_i = \frac{y_i - \sum_{j=i+1}^{n} u_{ij}x_j}{u_{ii}}, \quad i = n-1, \dots, 1.$$
+
+Cada sustitución cuesta $O(n^{2})$: eso es lo que se gana al no repetir la eliminación.
+
+**🧮 Ejemplo algebraico.** Con $\mathbf{L} = \begin{bmatrix} 1 & 0 \\ m_{21} & 1 \end{bmatrix}$ y $\mathbf{U} = \begin{bmatrix} u_{11} & u_{12} \\ 0 & u_{22} \end{bmatrix}$:
+
+$$y_1 = b_1, \qquad y_2 = b_2 - m_{21}y_1,$$
+
+$$x_2 = \frac{y_2}{u_{22}}, \qquad x_1 = \frac{y_1 - u_{12}x_2}{u_{11}}.$$
+
+Ninguna de las cuatro fórmulas toca la matriz $\mathbf{A}$ original: todo sale de entradas ya calculadas de $\mathbf{L}$ y $\mathbf{U}$.
+
+**🔢 Versión con enteros (paso a paso).** Se factoriza la matriz del subtema 2.1 y se toma $\mathbf{b} = [8,\ -11,\ -3]$:
+
+$$\mathbf{L} = \begin{bmatrix} 1 & 0 & 0 \\ -3/2 & 1 & 0 \\ -1 & 4 & 1 \end{bmatrix}.$$
+
+1. Renglón 1: $y_1 = b_1 = 8$.
+2. Renglón 2: $y_2 = -11 + 12 = 1$ (es $b_2 - l_{21}y_1$ con $l_{21} = -3/2$).
+3. Renglón 3: $y_3 = -3 + 8 - 4 = 1$ (es $b_3 - l_{31}y_1 - l_{32}y_2$).
+4. Resultado intermedio: $\mathbf{y} = [8,\ 1,\ 1]$.
+5. Con $\mathbf{U}$ triangular superior, la sustitución hacia atrás sobre $\mathbf{y}$ entrega $\mathbf{x} = [2,\ 3,\ -1]$, la misma solución del método directo.
 
 ---
 
 ### <a id="sec-2-3"></a>2.3 Variantes de Factorización
 
-#### A. Factorización de Doolittle
-* La matriz $\mathbf{L}$ es triangular inferior con **unos en la diagonal principal** ($l_{ii} = 1$).
-* La matriz $\mathbf{U}$ es triangular superior.
-* Los elementos fuera de la diagonal de $\mathbf{L}$ son exactamente los **multiplicadores de eliminación de Gauss** $m_{ik} = \frac{a_{ik}}{a_{kk}}$ obtenidos durante la eliminación hacia adelante *(véase [Sección 1.2](./01_eliminacion_gaussiana.md))*.
+**📘 Teoría.** La factorización $\mathbf{A} = \mathbf{L}\mathbf{U}$ no es única: hay $n^{2}+n$ incógnitas y solo $n^{2}$ ecuaciones, así que sobra libertad para fijar una diagonal. De ahí las dos convenciones usuales.
 
-$$\mathbf{L} = \begin{bmatrix}
-1 & 0 & 0 \\
-m_{21} & 1 & 0 \\
-m_{31} & m_{32} & 1
-\end{bmatrix}, \quad
-\mathbf{U} = \begin{bmatrix}
-u_{11} & u_{12} & u_{13} \\
-0 & u_{22} & u_{23} \\
-0 & 0 & u_{33}
-\end{bmatrix}$$
+**Doolittle** fija $l_{ii} = 1$ y deja libre la diagonal de $\mathbf{U}$. Las entradas de $\mathbf{L}$ son los multiplicadores de Gauss y las de $\mathbf{U}$ son los pivotes ya actualizados:
 
-#### B. Factorización de Crout
-* La matriz $\mathbf{U}$ es triangular superior con **unos en la diagonal principal** ($u_{ii} = 1$).
-* La matriz $\mathbf{L}$ es triangular inferior y contiene los coeficientes de escala.
+$$u_{kj} = a_{kj} - \sum_{i=1}^{k-1} l_{ki}u_{ij}, \qquad l_{ik} = \frac{a_{ik} - \sum_{j=1}^{k-1} l_{ij}u_{jk}}{u_{kk}}.$$
 
-Fórmulas de Crout para la columna $j$ y renglón $i$:
-$$l_{ij} = a_{ij} - \sum_{k=1}^{j-1} l_{ik} u_{kj}, \quad \text{para } i = j, \dots, n$$
-$$u_{jk} = \frac{a_{jk} - \sum_{i=1}^{j-1} l_{ji} u_{ik}}{l_{jj}}, \quad \text{para } k = j+1, \dots, n$$
+**Crout** fija $u_{ii} = 1$; ahora la diagonal escala en $\mathbf{L}$:
+
+$$l_{ik} = a_{ik} - \sum_{j=1}^{k-1} l_{ij}u_{jk}, \qquad u_{kj} = \frac{a_{kj} - \sum_{i=1}^{k-1} l_{ki}u_{ij}}{l_{kk}}.$$
+
+Doolittle es la variante natural si ya se programó eliminación gaussiana; Crout evita divisiones al construir las columnas.
+
+**🧮 Ejemplo algebraico.** Para $n = 2$ con Doolittle, las recurrencias se reducen a
+
+$$u_{11} = a_{11}, \quad u_{12} = a_{12}, \quad l_{21} = \frac{a_{21}}{u_{11}}, \quad u_{22} = a_{22} - l_{21}u_{12},$$
+
+mientras que con Crout ($u_{11} = u_{22} = 1$) se invierte el reparto:
+
+$$l_{11} = a_{11}, \quad l_{21} = a_{21}, \quad u_{12} = \frac{a_{12}}{l_{11}}, \quad l_{22} = a_{22} - l_{21}u_{12}.$$
+
+Ambas producen la misma $\mathbf{A}$; solo cambia qué matriz carga la escala.
+
+**🔢 Versión con enteros (paso a paso).** Doolittle aplicado a
+
+$$\mathbf{A} = \begin{bmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{bmatrix}.$$
+
+1. Paso $k=1$: el primer renglón de $\mathbf{U}$ es $[2,\ 1,\ -1]$ y los multiplicadores forman la columna de $\mathbf{L}$: $l_{21} = -3/2$, $l_{31} = -1$.
+2. Paso $k=2$: $u_{22} = 1/2$, $u_{23} = 1/2$ y $l_{32} = 4$.
+3. Paso $k=3$: $u_{33} = -1$.
+4. Resultado:
+
+$$\mathbf{L} = \begin{bmatrix} 1 & 0 & 0 \\ -3/2 & 1 & 0 \\ -1 & 4 & 1 \end{bmatrix}, \qquad
+\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & 1/2 & 1/2 \\ 0 & 0 & -1 \end{bmatrix}.$$
+
+5. Verificación $k$-ésima renglón por renglón con $\mathbf{L}\mathbf{U} = \mathbf{A}$: la fila 1 da $[2,\ 1,\ -1]$; la fila 2 da $[-3,\ -1,\ 2]$; la fila 3 da $[-2,\ 1,\ 2]$. Coincide con $\mathbf{A}$.
 
 ---
 
 ### <a id="sec-2-4"></a>2.4 Cálculo Eficiente de la Matriz Inversa $\mathbf{A}^{-1}$
 
-La matriz inversa $\mathbf{X} = \mathbf{A}^{-1}$ satisface:
+**📘 Teoría.** La inversa $\mathbf{X} = \mathbf{A}^{-1}$ es la matriz que satisface
 
-$$\mathbf{A}\mathbf{X} = \mathbf{I}$$
+$$\mathbf{A}\mathbf{X} = \mathbf{I}.$$
 
-donde $\mathbf{I}$ es la matriz identidad de $n \times n$. Denotando $\mathbf{x}^{(j)}$ como la $j$-ésima columna de $\mathbf{A}^{-1}$ y $\mathbf{e}^{(j)}$ como el $j$-ésimo vector canónico unitario de $\mathbf{I}$:
+Vista por columnas, esa igualdad son $n$ sistemas independientes: si $\mathbf{x}^{(j)}$ es la columna $j$ de $\mathbf{X}$ y $\mathbf{e}^{(j)}$ es el $j$-ésimo vector canónico de la identidad, entonces
 
-$$\mathbf{A}\mathbf{x}^{(j)} = \mathbf{e}^{(j)}, \quad \text{para } j = 1, \dots, n$$
+$$\mathbf{A}\mathbf{x}^{(j)} = \mathbf{e}^{(j)}, \qquad j = 1, \dots, n.$$
 
-#### Procedimiento:
-1. Se descompone la matriz $\mathbf{A}$ en $\mathbf{L}\mathbf{U}$ una sola vez ($O(n^3)$).
-2. Se realizan $n$ resoluciones independientes usando los vectores canónicos $\mathbf{e}^{(1)}, \mathbf{e}^{(2)}, \dots, \mathbf{e}^{(n)}$ como lados derechos.
-3. Cada columna $\mathbf{x}^{(j)}$ toma $O(n^2)$ operaciones. El costo total para obtener $\mathbf{A}^{-1}$ es de $\frac{4}{3} n^3$ FLOPs.
+El procedimiento es: factorizar $\mathbf{A} = \mathbf{L}\mathbf{U}$ **una sola vez** ($O(n^{3})$) y resolver los $n$ sistemas con los vectores canónicos como lados derechos, a $O(n^{2})$ cada uno. El costo total de obtener $\mathbf{A}^{-1}$ es $\tfrac{4}{3}n^{3}$ FLOPs.
+
+**🧮 Ejemplo algebraico.** Para $n = 2$ las dos columnas se resuelven por separado:
+
+$$\mathbf{A}\mathbf{x}^{(1)} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \qquad \mathbf{A}\mathbf{x}^{(2)} = \begin{bmatrix} 0 \\ 1 \end{bmatrix},$$
+
+y la inversa se arma pegando los resultados:
+
+$$\mathbf{A}^{-1} = \begin{bmatrix} \mid & \mid \\ \mathbf{x}^{(1)} & \mathbf{x}^{(2)} \\ \mid & \mid \end{bmatrix}.$$
+
+Cada columna usa la misma $\mathbf{L}$ y la misma $\mathbf{U}$; lo único que cambia es el lado derecho.
+
+**🔢 Versión con enteros (paso a paso).** Con
+
+$$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}:$$
+
+1. La inversa verificada es
+
+$$\mathbf{A}^{-1} = \begin{bmatrix} 3/5 & -1/5 \\ -1/5 & 2/5 \end{bmatrix}.$$
+
+2. Comprobación por columnas: la primera columna de $\mathbf{A}\mathbf{A}^{-1}$ es $2(3/5) + 1(-1/5) = 1$ y $1(3/5) + 3(-1/5) = 0$.
+3. La segunda columna es $2(-1/5) + 1(2/5) = 0$ y $1(-1/5) + 3(2/5) = 1$.
+4. Como $\mathbf{A}\mathbf{A}^{-1} = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \mathbf{I}$, la inversa es correcta.
 
 ---
 
 ### <a id="sec-2-5"></a>2.5 Condicionamiento del Sistema y Normas Matriciales
 
-#### Número de Condición $\text{Cond}(\mathbf{A})$
-Mide la sensibilidad de la solución $\mathbf{x}$ ante pequeñas variaciones o errores en los datos de entrada ($\mathbf{A}$ o $\mathbf{b}$):
+**📘 Teoría.** El condicionamiento mide cuánto se amplifica en la solución $\mathbf{x}$ un error cometido en los datos ($\mathbf{A}$ o $\mathbf{b}$). Se cuantifica con el número de condición
 
-$$\text{Cond}(\mathbf{A}) = \|\mathbf{A}\| \cdot \|\mathbf{A}^{-1}\|$$
+$$\text{Cond}(\mathbf{A}) = \|\mathbf{A}\| \cdot \|\mathbf{A}^{-1}\|.$$
 
-Usando la **norma renglón-suma ($\|\cdot\|_\infty$)**:
+Con la **norma renglón-suma** ($\|\cdot\|_\infty$), que suma el valor absoluto de cada renglón y toma el máximo,
 
-$$\|\mathbf{A}\|_\infty = \max_{1 \le i \le n} \sum_{j=1}^n |a_{ij}|$$
+$$\|\mathbf{A}\|_\infty = \max_{1 \le i \le n} \sum_{j=1}^{n} |a_{ij}|,$$
 
-#### Cota de Error Relativo:
-$$\frac{\|\Delta \mathbf{x}\|}{\|\mathbf{x}\|} \le \text{Cond}(\mathbf{A}) \cdot \frac{\|\Delta \mathbf{A}\|}{\|\mathbf{A}\|}$$
+la perturbación del lado derecho se acota por
 
-* **Sistema Bien Condicionado:** $\text{Cond}(\mathbf{A}) \approx 1$.
-* **Sistema Mal Condicionado:** $\text{Cond}(\mathbf{A}) \gg 10^k$ (se pueden perder hasta $k$ dígitos de precisión por error de redondeo).
+$$\frac{\|\Delta\mathbf{x}\|}{\|\mathbf{x}\|} \le \text{Cond}(\mathbf{A})\,\frac{\|\Delta\mathbf{b}\|}{\|\mathbf{b}\|}.$$
 
----
+Un sistema bien condicionado tiene $\text{Cond}(\mathbf{A}) \approx 1$; si $\text{Cond}(\mathbf{A}) \gg 10^{k}$ se pueden perder hasta $k$ dígitos de precisión.
 
----
+**🧮 Ejemplo algebraico.** Para una matriz $2\times 2$ genérica,
 
-### <a id="sec-ejemplo"></a>🔢 Ejemplo resuelto paso a paso
+$$\|\mathbf{A}\|_\infty = \max\left(|a_{11}| + |a_{12}|,\ |a_{21}| + |a_{22}|\right),$$
 
-Factorizamos la misma matriz del ejemplo de Gauss por **Doolittle**:
+y con $\mathbf{A}^{-1} = \begin{bmatrix} b_{11} & b_{12} \\ b_{21} & b_{22} \end{bmatrix}$ se calcula igual, renglón por renglón. El número de condición es el producto de las dos normas; como $\text{Cond}(\mathbf{A}) = \text{Cond}(\mathbf{A}^{-1})$, la cifra no depende de cuál de las dos matrices se tome como referencia.
 
-$$\mathbf{A} = \begin{bmatrix} 3 & -0.1 & -0.2 \\ 0.1 & 7 & -0.3 \\ 0.3 & -0.2 & 10 \end{bmatrix}$$
+**🔢 Versión con enteros (paso a paso).** Con
 
-**Paso $k=1$:** $U_{1,:} = [3,\ -0.1,\ -0.2]$. Los multiplicadores forman la columna de $\mathbf{L}$:
+$$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}, \qquad \mathbf{A}^{-1} = \begin{bmatrix} 3/5 & -1/5 \\ -1/5 & 2/5 \end{bmatrix}.$$
 
-$$l_{21} = \frac{0.1}{3} = 0.0333, \qquad l_{31} = \frac{0.3}{3} = 0.1$$
-
-**Paso $k=2$:** $U_{2,:} = [0,\ 7.00333,\ -0.29333]$ y $l_{32} = -0.19/7.00333 = -0.02713$.
-
-**Paso $k=3$:** $U_{3,:} = [0,\ 0,\ 10.0120]$.
-
-Resultado:
-
-$$\mathbf{L} = \begin{bmatrix} 1 & 0 & 0 \\ 0.0333 & 1 & 0 \\ 0.1 & -0.02713 & 1 \end{bmatrix}, \qquad \mathbf{U} = \begin{bmatrix} 3 & -0.1 & -0.2 \\ 0 & 7.00333 & -0.29333 \\ 0 & 0 & 10.0120 \end{bmatrix}$$
-
-Comprobamos $\mathbf{A} = \mathbf{L}\mathbf{U}$ multiplicando. Para resolver $\mathbf{A}\mathbf{x}=\mathbf{b}$:
-
-**Sustitución hacia adelante** ($\mathbf{L}\mathbf{d}=\mathbf{b}$): $d_1 = 7.85$, $d_2 = -19.5617$, $d_3 = 70.0843$.
-
-**Sustitución hacia atrás** ($\mathbf{U}\mathbf{x}=\mathbf{d}$): $\mathbf{x} = [3,\ -2.5,\ 7]^T$.
-
-> 💡 **¿Para qué sirve?** Si tienes que resolver el sistema con **muchos** vectores $\mathbf{b}$ distintos (misma matriz $\mathbf{A}$), factorizas una sola vez ($O(n^3)$) y cada solución nueva cuesta solo $O(n^2)$.
+1. Norma de $\mathbf{A}$: renglón 1 suma $2 + 1 = 3$; renglón 2 suma $1 + 3 = 4$. Por lo tanto $\|\mathbf{A}\|_\infty = 4$.
+2. Norma de $\mathbf{A}^{-1}$: renglón 1 suma $3/5 + 1/5 = 4/5$; renglón 2 suma $1/5 + 2/5 = 3/5$. Por lo tanto $\|\mathbf{A}^{-1}\|_\infty = 4/5$.
+3. Número de condición: $\text{Cond}(\mathbf{A}) = 4 \cdot \tfrac{4}{5} = \tfrac{16}{5} = 3.2$.
+4. Interpretación: $3.2$ está cerca de $1$, así que el sistema está **bien condicionado** y un error relativo en $\mathbf{b}$ se amplifica poco más de tres veces.
 
 ---
 
