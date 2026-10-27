@@ -30,9 +30,12 @@ Forma de ``M[[...]]`` (regla de MATLAB): ``M[[1, 2, 3]]`` es un RENGLÓN (1x3);
 ``M[[1], [2], [3]]`` es una COLUMNA (3x1); ``M[[1, 2], [3, 4]]`` es una matriz
 2x2, donde cada lista interior es un renglón.
 
-Concatenar: ``c_[A, b]`` y ``r_[a, b]`` son de NumPy (horizontal y vertical) y no
-admiten símbolos. Para matrices simbólicas usa ``apilar_columnas`` y
-``apilar_filas``, que hacen lo mismo y sí los aceptan.
+Concatenar como en MATLAB: si dentro de ``M[[...]]`` hay matrices en vez de números,
+se concatenan. ``M[[A, b]]`` = ``[A, b]`` (horizontal), ``M[[A], [B]]`` = ``[A; B]``
+(vertical) y ``M[[A, B], [C, D]]`` = matriz por bloques. Esto evita el problema de
+``np.array([A, b])``, que produce un arreglo de 3 dimensiones o de objetos.
+También existen ``horzcat``, ``vertcat`` y ``cat(dim, ...)``, y las versiones que
+aceptan símbolos: ``apilar_columnas`` y ``apilar_filas``.
 """
 
 # ============================================================
@@ -269,6 +272,22 @@ def _es_simbolico(x):
     return isinstance(x, (sym.Symbol, sym.Expr)) or hasattr(x, 'free_symbols')
 
 
+def _es_matriz(x):
+    """¿x ya es una matriz (NumPy o SymPy) y no un número suelto?"""
+    return isinstance(x, (np.ndarray, sym.MatrixBase))
+
+
+def _tiene_matrices(datos):
+    """¿Hay alguna matriz en la estructura anidada?"""
+    for x in datos:
+        if isinstance(x, (list, tuple)):
+            if _tiene_matrices(x):
+                return True
+        elif _es_matriz(x):
+            return True
+    return False
+
+
 # Trigonométricas "inteligentes": SymPy si la entrada es simbólica, NumPy si es numérica.
 def sin(x):
     return sym.sin(x) if _es_simbolico(x) else np.sin(x)
@@ -293,14 +312,30 @@ class _CreadorMatriz:
     - ``M[[1, 2, 3]]``        -> renglón 1x3   (todos son números sueltos)
     - ``M[[1], [2], [3]]``    -> columna 3x1
     - ``M[[1, 2], [3, 4]]``   -> matriz 2x2    (cada lista interior es un renglón)
+    - ``M[[A, b]]``           -> CONCATENA en horizontal si los elementos son matrices
+
+    El último caso evita el problema de ``np.array([A, b])``, que produce un
+    arreglo tridimensional (o un arreglo de objetos) en vez de una matriz.
     """
 
     def __getitem__(self, datos):
         if not isinstance(datos, (list, tuple)):
             datos = [datos]
+        # --- Concatenación estilo MATLAB ---
+        # Si hay matrices dentro, la lista no describe números sino BLOQUES.
+        if datos and _tiene_matrices(datos):
+            if not _builtins.all(isinstance(x, (list, tuple)) for x in datos):
+                # M[[A, b]]  ->  [A, b] de MATLAB: uno al lado del otro
+                return apilar_columnas(*datos)
+            # M[[A], [B]] o M[[A, B], [C, D]] -> matriz por bloques:
+            # cada lista interior es un renglón de bloques.
+            filas = [apilar_columnas(*fila) if len(fila) > 1 else _bloque_matriz(fila[0])
+                     for fila in datos]
+            return apilar_filas(*filas)
+        # --- Construcción normal, número por número ---
         # Si NINGÚN elemento es una lista, es un vector: en MATLAB [1 2 3] es un
         # renglón, así que se devuelve con forma (1, n).
-        if datos and not any(isinstance(x, (list, tuple)) for x in datos):
+        if datos and not _builtins.any(isinstance(x, (list, tuple)) for x in datos):
             filas = [list(datos)]
         else:
             filas = [fila if isinstance(fila, (list, tuple)) else [fila] for fila in datos]
@@ -489,8 +524,79 @@ def apilar_columnas(*bloques):
 
     Equivale a ``c_[...]`` de NumPy, pero funciona también con matrices
     simbólicas. Es lo que forma la matriz aumentada [A | b].
+
+    Un escalar suelto se repite como columna del alto correcto, igual que en
+    MATLAB al escribir ``[A, 9]``.
+
+    También disponible como ``horzcat(...)``, el nombre de MATLAB.
     """
-    partes, simbolico = _bloques_a_matrices(bloques)
-    if simbolico:
-        return MatrizRobomat(partes[0].row_join(*partes[1:]))
-    return np.hstack(partes)
+    hay_simbolico = _builtins.any(
+        isinstance(b, (sym.MatrixBase, MatrizRobomat)) or _es_simbolico(b)
+        for b in bloques)
+
+    if hay_simbolico:
+        mats = []
+        alturas = []
+        for b in bloques:
+            if isinstance(b, MatrizRobomat):
+                mats.append(b); alturas.append(b.rows)
+            elif isinstance(b, sym.MatrixBase):
+                mats.append(MatrizRobomat(b)); alturas.append(b.rows)
+            elif _es_matriz(b):
+                m = MatrizRobomat(sym.Matrix(np.asarray(b).tolist()))
+                mats.append(m); alturas.append(m.rows)
+            else:
+                mats.append(None); alturas.append(1)      # escalar
+        alto = max(a for a in alturas if a > 1) if _builtins.any(a > 1 for a in alturas) else 1
+        mats = [MatrizRobomat(sym.ones(alto, 1) * b) if m is None else m
+                for m, b in zip(mats, bloques)]
+        return MatrizRobomat(mats[0].row_join(*mats[1:]))
+
+    partes = [np.atleast_2d(b).astype(float) for b in bloques]
+    # alto maximo entre los bloques (los vectores de una fila se acuestan)
+    alturas = [p.shape[0] if p.shape[0] != 1 else 1 for p in partes]
+    alto = max(alturas)
+    piezas = []
+    for b, a in zip(bloques, partes):
+        if a.shape == (1, 1):                      # escalar -> columna de alto
+            piezas.append(np.full((alto, 1), float(a[0, 0])))
+        elif a.shape[0] == 1 and a.shape[1] > 1:   # vector fila -> columna
+            piezas.append(a.T)
+        else:
+            piezas.append(a)
+    return np.hstack(piezas)
+
+
+def _bloque_matriz(x):
+    """Normaliza un bloque suelto a matriz 2-D (vector fila -> columna)."""
+    if isinstance(x, MatrizRobomat):
+        return x
+    if isinstance(x, np.ndarray):
+        a = np.atleast_2d(x).astype(float)
+        return a.T if a.shape[0] == 1 and a.shape[1] > 1 else a
+    if isinstance(x, sym.MatrixBase):
+        return MatrizRobomat(x)
+    return sym.Matrix([[x]])
+
+
+def horzcat(*bloques):
+    """Concatena en HORIZONTAL, como ``[A, b]`` en MATLAB."""
+    return apilar_columnas(*bloques)
+
+
+def vertcat(*bloques):
+    """Concatena en VERTICAL, como ``[A; B]`` en MATLAB."""
+    return apilar_filas(*bloques)
+
+
+def cat(dim, *bloques):
+    """Concatena a lo largo de una dimensión, como ``cat(dim, A, B)`` de MATLAB.
+
+    - ``cat(1, A, B)`` -> vertical   (uno debajo de otro)
+    - ``cat(2, A, B)`` -> horizontal (uno al lado de otro)
+    """
+    if dim == 1:
+        return apilar_filas(*bloques)
+    if dim == 2:
+        return apilar_columnas(*bloques)
+    raise ValueError('cat() solo admite dim=1 (vertical) o dim=2 (horizontal).')
