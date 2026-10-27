@@ -30,13 +30,13 @@
 
 - [x] `lib/robomat.py` — fusión `matlab_like` + `robomat` (con sobreescritura de builtins sombreados).
 - [x] `01_Algebra_Lineal.ipynb` — fusión `matlab_like` + `robomat`, intro práctica.
-- [ ] `02_Laboratorios_Metodos.ipynb` — laboratorios + autograder (MCQ + numéricas), patrón U2_T3B.
+- [x] `02_Laboratorios_Metodos.ipynb` — laboratorios interactivos + MCQ + numéricas (envío Apps Script en Fase 4).
 - [x] `03_Seleccion_Casos.ipynb` — registro equipos + asignación determinista por NC, patrón U2_T4_1.
 - [x] `04_Analisis_Casos.ipynb` — cada método en `.py`, comparación manual vs NumPy/SciPy, Monte Carlo + LaTeX.
 
-## Fase 3 — Plantilla de reporte LaTeX
+## Fase 3 — Plantilla de reporte LaTeX ✅
 
-- [ ] `reporte/main.tex`, `clases.cls`, `portada/`, `secciones/` (réplica de U2_T4_Reporte).
+- [x] `reporte/main.tex`, `clases.cls`, `portada/`, `secciones/` (réplica de U2_T4_Reporte).
 
 ## Fase 4 — Integración Colab ↔ Google Sheets / Apps Script
 
