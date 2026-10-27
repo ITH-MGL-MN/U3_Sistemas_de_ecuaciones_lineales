@@ -49,6 +49,30 @@ plt.rcParams['figure.figsize'] = (8, 6)
 # Alias cortos estilo MATLAB
 lin = linspace
 
+# ------------------------------------------------------------------
+# zeros y ones con dos dimensiones, como en MATLAB.
+# NumPy interpreta el segundo argumento como `dtype`, así que
+# zeros(3, 4) fallaba; aquí se acepta la forma zeros(m, n).
+# OJO: zeros(3) sigue siendo un VECTOR de 3 (semántica de NumPy),
+# no una matriz 3x3 como en MATLAB.
+# ------------------------------------------------------------------
+_np_zeros = np.zeros
+_np_ones = np.ones
+
+
+def zeros(*args, **kwargs):
+    """zeros(n) -> vector de n ceros;  zeros(m, n) -> matriz m x n de ceros."""
+    if len(args) >= 2 and all(isinstance(a, (int, np.integer)) for a in args):
+        return _np_zeros(tuple(int(a) for a in args), **kwargs)
+    return _np_zeros(*args, **kwargs)
+
+
+def ones(*args, **kwargs):
+    """ones(n) -> vector de n unos;  ones(m, n) -> matriz m x n de unos."""
+    if len(args) >= 2 and all(isinstance(a, (int, np.integer)) for a in args):
+        return _np_ones(tuple(int(a) for a in args), **kwargs)
+    return _np_ones(*args, **kwargs)
+
 
 # ------------------------------------------------------------------
 # Re-exponer builtins sombreados por `from numpy import *` para que
