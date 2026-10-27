@@ -26,6 +26,10 @@ Constructores: ``zeros(3)`` da una matriz 3x3 (convención de MATLAB), no un vec
 para un vector usa ``zeros(3, 1)`` o ``zeros(1, 3)``. Las versiones simbólicas son
 ``zeros.sym``, ``ones.sym`` y ``eye.sym``.
 
+Forma de ``M[[...]]`` (regla de MATLAB): ``M[[1, 2, 3]]`` es un RENGLÓN (1x3);
+``M[[1], [2], [3]]`` es una COLUMNA (3x1); ``M[[1, 2], [3, 4]]`` es una matriz
+2x2, donde cada lista interior es un renglón.
+
 Concatenar: ``c_[A, b]`` y ``r_[a, b]`` son de NumPy (horizontal y vertical) y no
 admiten símbolos. Para matrices simbólicas usa ``apilar_columnas`` y
 ``apilar_filas``, que hacen lo mismo y sí los aceptan.
@@ -284,12 +288,22 @@ deg = np.degrees
 
 
 class _CreadorMatriz:
-    """M[[...], [...]] -> matriz (numérica o simbólica)."""
+    """M[[...]] -> matriz (numérica o simbólica), con la regla de MATLAB.
+
+    - ``M[[1, 2, 3]]``        -> renglón 1x3   (todos son números sueltos)
+    - ``M[[1], [2], [3]]``    -> columna 3x1
+    - ``M[[1, 2], [3, 4]]``   -> matriz 2x2    (cada lista interior es un renglón)
+    """
 
     def __getitem__(self, datos):
         if not isinstance(datos, (list, tuple)):
             datos = [datos]
-        filas = [fila if isinstance(fila, (list, tuple)) else [fila] for fila in datos]
+        # Si NINGÚN elemento es una lista, es un vector: en MATLAB [1 2 3] es un
+        # renglón, así que se devuelve con forma (1, n).
+        if datos and not any(isinstance(x, (list, tuple)) for x in datos):
+            filas = [list(datos)]
+        else:
+            filas = [fila if isinstance(fila, (list, tuple)) else [fila] for fila in datos]
         plano = [x for fila in filas for x in fila]
         if _builtins.any(_es_simbolico(x) for x in plano):
             return MatrizRobomat(filas)
