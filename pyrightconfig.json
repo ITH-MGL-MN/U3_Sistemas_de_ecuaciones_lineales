@@ -1,0 +1,8 @@
+{
+  "include": ["notebooks", "lib"],
+  "extraPaths": ["lib"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+  "reportWildcardImportFromLibrary": "none",
+  "reportMissingImports": "warning"
+}

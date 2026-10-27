@@ -1,0 +1,9 @@
+{
+  // Estos ajustes aplican si abres SOLO esta carpeta (U3_Repo).
+  // Si abres el .code-workspace del curso, mandan los de allí.
+  "python.analysis.extraPaths": ["lib"],
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportWildcardImportFromLibrary": "none"
+  },
+  "python.testing.pytestEnabled": false
+}
