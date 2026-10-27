@@ -151,8 +151,9 @@ $2\times2$ sencillo:
 $$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 4 \\ 7 \end{bmatrix}.$$
 
 1. Se traducen los renglones a ecuaciones: $2x_1 + x_2 = 4$ y $x_1 + 3x_2 = 7$.
-2. Se arma la matriz aumentada: $\begin{bmatrix} 2 & 1 & \mid & 4 \\ 1 & 3 & \mid & 7 \end{bmatrix}$.
-3. Se revisa el pivote de la columna 1: $a_{11} = 2 \neq 0$, por lo que se puede eliminar hacia adelante sin intercambiar renglones.
+2. Se arma la matriz aumentada:
+   $$\begin{bmatrix} 2 & 1 & \mid & 4 \\ 1 & 3 & \mid & 7 \end{bmatrix}$$
+5. Se revisa el pivote de la columna 1: $a_{11} = 2 \neq 0$, por lo que se puede eliminar hacia adelante sin intercambiar renglones.
 
 ---
 
