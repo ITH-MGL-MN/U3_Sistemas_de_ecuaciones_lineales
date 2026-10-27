@@ -113,7 +113,21 @@ def mostrar(expr):
 
 
 class MatrizRobomat(sym.MutableDenseMatrix):
-    """Matriz simbólica cuya propiedad .T devuelve otra MatrizRobomat."""
+    """Matriz simbólica con la misma semántica de operadores que NumPy.
+
+    En SymPy puro ``*`` es el producto matricial; aquí se cambia a propósito
+    para que el resultado **no dependa** de si la matriz tiene números o letras:
+
+        A * B    -> producto ELEMENTO A ELEMENTO
+        A @ B    -> producto MATRICIAL
+        A ** 2   -> potencia ELEMENTO A ELEMENTO
+
+    Hay que redefinir también ``__matmul__`` y ``__pow__`` porque SymPy los
+    deriva de ``__mul__``: si solo se cambiara ``*``, ``@`` quedaría haciendo el
+    producto elemento a elemento sin avisar.
+    """
+
+    __array_priority__ = 1000.0   # que NumPy ceda el paso a nuestra __rmul__
 
     @property
     def T(self):
@@ -122,6 +136,41 @@ class MatrizRobomat(sym.MutableDenseMatrix):
     def __array__(self, dtype=None, *args, **kwargs):
         """Permite np.array(m) y operaciones NumPy sobre la matriz."""
         return np.array(self.tolist(), dtype=dtype or float)
+
+    @staticmethod
+    def _como_matriz(otro):
+        """Convierte un arreglo de NumPy a matriz simbólica."""
+        return sym.Matrix(np.asarray(otro).tolist())
+
+    def __mul__(self, otro):
+        """Producto elemento a elemento (como ``.*`` de MATLAB)."""
+        if isinstance(otro, np.ndarray):
+            otro = self._como_matriz(otro)
+        if isinstance(otro, sym.MatrixBase):
+            return MatrizRobomat(self.multiply_elementwise(otro))
+        if isinstance(otro, (int, float, complex, np.number, sym.Basic)):
+            return MatrizRobomat(self.applyfunc(lambda e: e * otro))
+        return NotImplemented
+
+    def __rmul__(self, otro):
+        return self.__mul__(otro)
+
+    def __matmul__(self, otro):
+        """Producto matricial (el que en SymPy sería ``*``)."""
+        if isinstance(otro, np.ndarray):
+            otro = self._como_matriz(otro)
+        return MatrizRobomat(sym.MutableDenseMatrix.__mul__(self, otro))
+
+    def __rmatmul__(self, otro):
+        if isinstance(otro, np.ndarray):
+            otro = self._como_matriz(otro)
+        return MatrizRobomat(sym.MutableDenseMatrix.__rmul__(self, otro))
+
+    def __pow__(self, n):
+        """Potencia elemento a elemento (como en NumPy)."""
+        if isinstance(n, (int, np.integer)):
+            return MatrizRobomat(self.applyfunc(lambda e: e ** n))
+        return NotImplemented
 
 
 def _es_simbolico(x):
