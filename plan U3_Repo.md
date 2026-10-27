@@ -29,10 +29,10 @@
 ## Fase 2 — Cuadernos Colab (los 4)
 
 - [x] `lib/robomat.py` — fusión `matlab_like` + `robomat` (con sobreescritura de builtins sombreados).
-- [x] `01_Algebra_Lineal.ipynb` — fusión `matlab_like` + `robomat`, intro práctica.
-- [x] `02_Laboratorios_Metodos.ipynb` — laboratorios interactivos + MCQ + numéricas (envío Apps Script en Fase 4).
-- [x] `03_Seleccion_Casos.ipynb` — registro equipos + asignación determinista por NC, patrón U2_T4_1.
-- [x] `04_Analisis_Casos.ipynb` — cada método en `.py`, comparación manual vs NumPy/SciPy, Monte Carlo + LaTeX.
+- [x] `U3_01_Algebra_Lineal.ipynb` — fusión `matlab_like` + `robomat`, intro práctica.
+- [x] `U3_02_Laboratorios_Metodos.ipynb` — laboratorios interactivos + MCQ + numéricas (envío Apps Script en Fase 4).
+- [x] `U3_03_Seleccion_Casos.ipynb` — registro equipos + asignación determinista por NC, patrón U2_T4_1.
+- [x] `U3_04_Analisis_Casos.ipynb` — cada método en `.py`, comparación manual vs NumPy/SciPy, Monte Carlo + LaTeX.
 
 ## Fase 3 — Plantilla de reporte LaTeX ✅
 

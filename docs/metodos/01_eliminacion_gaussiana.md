@@ -139,7 +139,7 @@ $$x_2 = \frac{-19.5617 - (-0.29333)(7)}{7.00333} = -2.5$$
 
 $$x_1 = \frac{7.85 - (-0.1)(-2.5) - (-0.2)(7)}{3} = 3$$
 
-**Solución:** $\mathbf{x} = [3,\ -2.5,\ 7]^T$. ✅ *Verifícalo en el [Cuaderno 04](../../notebooks/04_Analisis_Casos.ipynb) con `np.linalg.solve(A, b)`.*
+**Solución:** $\mathbf{x} = [3,\ -2.5,\ 7]^T$. ✅ *Verifícalo en el [Cuaderno 04](../../notebooks/U3_04_Analisis_Casos.ipynb) con `np.linalg.solve(A, b)`.*
 
 ---
 

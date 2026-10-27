@@ -21,10 +21,10 @@ U3/
 │       ├── casos_index.md
 │       └── caso_t01.md … caso_t17.md
 ├── notebooks/                     <-- Cuadernos interactivos en Google Colab
-│   ├── 01_Algebra_Lineal.ipynb
-│   ├── 02_Laboratorios_Metodos.ipynb
-│   ├── 03_Seleccion_Casos.ipynb
-│   └── 04_Analisis_Casos.ipynb
+│   ├── U3_01_Algebra_Lineal.ipynb
+│   ├── U3_02_Laboratorios_Metodos.ipynb
+│   ├── U3_03_Seleccion_Casos.ipynb
+│   └── U3_04_Analisis_Casos.ipynb
 ├── lib/                           <-- Helpers: matlab_like + robomat (fusión)
 └── reporte/                       <-- Plantilla LaTeX del reporte final
 ```

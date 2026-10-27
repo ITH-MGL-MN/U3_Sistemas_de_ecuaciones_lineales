@@ -20,7 +20,7 @@
 
 ### <a id="sec-enlaces"></a>📌 Enlaces Relacionados en el Repositorio:
 * 🌐 [Regresar al README Principal del Repositorio](../../README.md)
-* 🧪 [Ejecutar Laboratorio de Álgebra Lineal en Colab (Notebook 01)](../../notebooks/01_Algebra_Lineal.ipynb)
+* 🧪 [Ejecutar Laboratorio de Álgebra Lineal en Colab (Notebook 01)](../../notebooks/U3_01_Algebra_Lineal.ipynb)
 * 🏭 [Consultar Casos de Estudio de Ingeniería](../../docs/casos/)
 
 ---
