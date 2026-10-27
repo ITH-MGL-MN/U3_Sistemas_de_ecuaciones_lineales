@@ -24,7 +24,11 @@ matricial; la clase MatrizRobomat lo cambia para que no haya ambigüedad).
 
 Constructores: ``zeros(3)`` da una matriz 3x3 (convención de MATLAB), no un vector;
 para un vector usa ``zeros(3, 1)`` o ``zeros(1, 3)``. Las versiones simbólicas son
-``zeros_sym``, ``ones_sym`` y ``eye_sym``.
+``zeros.sym``, ``ones.sym`` y ``eye.sym``.
+
+Concatenar: ``c_[A, b]`` y ``r_[a, b]`` son de NumPy (horizontal y vertical) y no
+admiten símbolos. Para matrices simbólicas usa ``apilar_columnas`` y
+``apilar_filas``, que hacen lo mismo y sí los aceptan.
 """
 
 # ============================================================
@@ -437,3 +441,42 @@ def potencia_elem(A, n):
         M0 = A if isinstance(A, sym.MatrixBase) else sym.Matrix(A)
         return MatrizRobomat(M0.applyfunc(lambda e: e ** n))
     return np.power(A, n)
+
+
+def _bloques_a_matrices(bloques):
+    """Separa los bloques en simbólicos y numéricos, y decide el tipo del result."""
+    hay_simbolico = any(isinstance(b, (sym.MatrixBase, MatrizRobomat)) for b in bloques)
+    if hay_simbolico:
+        return [MatrizRobomat(sym.Matrix(b)) if not isinstance(b, MatrizRobomat)
+                else b for b in bloques], True
+    return [np.atleast_2d(b) for b in bloques], False
+
+
+def apilar_filas(*bloques):
+    """Apila bloques EN VERTICAL (uno debajo de otro).
+
+    Equivale a ``r_[...]`` de NumPy, pero funciona también con matrices
+    simbólicas. Sirve para armar una matriz renglón por renglón:
+
+        apilar_filas(M[[1, 2, 3]], M[[4, 5, 6]])   ->  matriz 2 x 3
+    """
+    partes, simbolico = _bloques_a_matrices(bloques)
+    if simbolico:
+        filas = []
+        for p in partes:
+            for i in range(p.rows):
+                filas.append([p[i, j] for j in range(p.cols)])
+        return MatrizRobomat(sym.Matrix(filas))
+    return np.vstack(partes)
+
+
+def apilar_columnas(*bloques):
+    """Apila bloques EN HORIZONTAL (uno al lado de otro).
+
+    Equivale a ``c_[...]`` de NumPy, pero funciona también con matrices
+    simbólicas. Es lo que forma la matriz aumentada [A | b].
+    """
+    partes, simbolico = _bloques_a_matrices(bloques)
+    if simbolico:
+        return MatrizRobomat(partes[0].row_join(*partes[1:]))
+    return np.hstack(partes)
