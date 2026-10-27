@@ -18,10 +18,13 @@ De esta forma el alumno escribe directamente, por ejemplo::
     q1, q2 = var('q1', 'q2')     # variables simbólicas
     J = jacobiano(M[[cos(q1)]], [q1])
 
-Operadores (importante): ``A @ B`` es el producto matricial y funciona igual en
-NumPy y en SymPy. Como ``*`` significa cosas distintas en cada biblioteca, para el
-producto elemento a elemento (el ``.*`` de MATLAB) usa ``hadamard(A, B)``, y para
-la potencia entrada por entrada, ``potencia_elem(A, n)``.
+Operadores (importante): ``A @ B`` es el producto matricial y ``A * B`` el
+producto elemento a elemento, igual en NumPy y en SymPy (en SymPy puro ``*`` sería
+matricial; la clase MatrizRobomat lo cambia para que no haya ambigüedad).
+
+Constructores: ``zeros(3)`` da una matriz 3x3 (convención de MATLAB), no un vector;
+para un vector usa ``zeros(3, 1)`` o ``zeros(1, 3)``. Las versiones simbólicas son
+``zeros_sym``, ``ones_sym`` y ``eye_sym``.
 """
 
 # ============================================================
@@ -50,28 +53,76 @@ plt.rcParams['figure.figsize'] = (8, 6)
 lin = linspace
 
 # ------------------------------------------------------------------
-# zeros y ones con dos dimensiones, como en MATLAB.
-# NumPy interpreta el segundo argumento como `dtype`, así que
-# zeros(3, 4) fallaba; aquí se acepta la forma zeros(m, n).
-# OJO: zeros(3) sigue siendo un VECTOR de 3 (semántica de NumPy),
-# no una matriz 3x3 como en MATLAB.
+# zeros / ones / eye con sintaxis de MATLAB.
+# En MATLAB zeros(3) es una matriz 3x3; en NumPy zeros(3) es un vector,
+# y ademas zeros(3, 4) fallaba porque el segundo argumento se tomaba
+# como `dtype`. Aqui se sigue MATLAB: zeros(3) -> matriz 3x3.
+# Para un vector usa zeros(n, 1) o zeros(1, n), que deja clara la forma.
+# Las versiones _sym devuelven matrices SIMBOLICAS (para llenar con letras).
 # ------------------------------------------------------------------
 _np_zeros = np.zeros
 _np_ones = np.ones
 
 
+def _dimensiones(args):
+    """Interpreta los argumentos como dimensiones, o devuelve None."""
+    if not args:
+        return None
+    if len(args) == 1 and isinstance(args[0], (tuple, list)):
+        return tuple(int(d) for d in args[0])
+    if all(isinstance(a, (int, np.integer)) for a in args):
+        return tuple(int(a) for a in args)
+    return None
+
+
 def zeros(*args, **kwargs):
-    """zeros(n) -> vector de n ceros;  zeros(m, n) -> matriz m x n de ceros."""
-    if len(args) >= 2 and all(isinstance(a, (int, np.integer)) for a in args):
-        return _np_zeros(tuple(int(a) for a in args), **kwargs)
+    """zeros(n) -> matriz n x n de ceros;  zeros(m, n) -> matriz m x n.
+
+    Sigue la convención de MATLAB. Para un vector usa zeros(n, 1) o zeros(1, n).
+    """
+    dims = _dimensiones(args)
+    if dims is not None:
+        return _np_zeros(dims if len(dims) > 1 else (dims[0], dims[0]), **kwargs)
     return _np_zeros(*args, **kwargs)
 
 
 def ones(*args, **kwargs):
-    """ones(n) -> vector de n unos;  ones(m, n) -> matriz m x n de unos."""
-    if len(args) >= 2 and all(isinstance(a, (int, np.integer)) for a in args):
-        return _np_ones(tuple(int(a) for a in args), **kwargs)
+    """ones(n) -> matriz n x n de unos;  ones(m, n) -> matriz m x n.
+
+    Sigue la convención de MATLAB. Para un vector usa ones(n, 1) o ones(1, n).
+    """
+    dims = _dimensiones(args)
+    if dims is not None:
+        return _np_ones(dims if len(dims) > 1 else (dims[0], dims[0]), **kwargs)
     return _np_ones(*args, **kwargs)
+
+
+def _forma_simbolica(args):
+    """Dimensiones para las variantes simbólicas: (n, n) si recibe solo n."""
+    dims = _dimensiones(args)
+    if dims is None:
+        raise TypeError('Usa zeros_sym(n), zeros_sym(m, n) o zeros_sym((m, n)).')
+    return dims if len(dims) > 1 else (dims[0], dims[0])
+
+
+def zeros_sym(*args):
+    """Matriz SIMBÓLICA de ceros: zeros_sym(3) -> 3x3, zeros_sym(2, 3) -> 2x3.
+
+    Útil para construirla vacía y luego llenarla con números y letras:
+
+        A = zeros_sym(2, 2);  A[0, 0] = x;  A[1, 1] = cos(q)
+    """
+    return MatrizRobomat(sym.zeros(*_forma_simbolica(args)))
+
+
+def ones_sym(*args):
+    """Matriz SIMBÓLICA de unos: ones_sym(3) -> 3x3."""
+    return MatrizRobomat(sym.ones(*_forma_simbolica(args)))
+
+
+def eye_sym(*args):
+    """Matriz SIMBÓLICA identidad: eye_sym(3) -> 3x3."""
+    return MatrizRobomat(sym.eye(*_forma_simbolica(args)))
 
 
 # ------------------------------------------------------------------
