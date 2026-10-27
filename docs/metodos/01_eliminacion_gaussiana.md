@@ -6,30 +6,149 @@
 
 ## 📑 Índice
 
-1. [1.1 Formulación Matricial del Sistema](#sec-1-1)
-2. [1.2 Eliminación Hacia Adelante (*Forward Elimination*)](#sec-1-2)
-3. [1.3 Estrategia de Pivoteo Parcial Por Renglón](#sec-1-3)
-4. [1.4 Sustitución Hacia Atrás (*Back Substitution*)](#sec-1-4)
-5. [1.5 Complejidad Computacional](#sec-1-5)
+- [Eliminación Gaussiana y Pivoteo Parcial](#eliminación-gaussiana-y-pivoteo-parcial)
+  - [📑 Índice](#-índice)
+    - [1.1 Formulación Matricial del Sistema](#11-formulación-matricial-del-sistema)
+    - [1.2 Eliminación Hacia Adelante (*Forward Elimination*)](#12-eliminación-hacia-adelante-forward-elimination)
+    - [1.3 Estrategia de Pivoteo Parcial Por Renglón](#13-estrategia-de-pivoteo-parcial-por-renglón)
+    - [1.4 Sustitución Hacia Atrás (*Back Substitution*)](#14-sustitución-hacia-atrás-back-substitution)
+    - [1.5 Complejidad Computacional](#15-complejidad-computacional)
 
 ### <a id="sec-1-1"></a>1.1 Formulación Matricial del Sistema
 
-**📘 Teoría.** Un sistema de $n$ ecuaciones lineales con $n$ incógnitas se escribe en forma matricial como
+**📘 Teoría.**
 
-$$\mathbf{A}\mathbf{x} = \mathbf{b}$$
+Un **sistema de ecuaciones lineales** es un conjunto de ecuaciones en el que cada
+incógnita aparece elevada a la primera potencia y nunca multiplicada por otra
+incógnita. *Resolver* el sistema significa encontrar un valor para cada incógnita
+que satisfaga **todas** las ecuaciones al mismo tiempo.
 
-donde $\mathbf{A} \in \mathbb{R}^{n \times n}$ es la matriz de coeficientes, $\mathbf{x} \in \mathbb{R}^{n}$ el vector de incógnitas y $\mathbf{b} \in \mathbb{R}^{n}$ el de términos independientes. Cada renglón de $\mathbf{A}$ guarda los coeficientes de una ecuación y cada columna los de una incógnita.
+#### Forma estándar: $n$ ecuaciones con $n$ incógnitas
 
-El método opera con **operaciones elementales de renglón**: intercambiar dos renglones y restar a un renglón un múltiplo de otro. Ninguna de las dos cambia el conjunto solución, pero sí obliga a arrastrar el lado derecho, así que se pega $\mathbf{b}$ a la derecha de $\mathbf{A}$ y se forma la **matriz aumentada**
+Antes de escribir nada con matrices, el sistema se escribe completo, ecuación por
+ecuación:
 
-$$[\mathbf{A}\mid\mathbf{b}] = \begin{bmatrix}
-a_{11} & a_{12} & \dots & a_{1n} & \mid & b_1 \\
-a_{21} & a_{22} & \dots & a_{2n} & \mid & b_2 \\
+$$
+\begin{aligned}
+a_{11}x_1 + a_{12}x_2 + \cdots + a_{1n}x_n &= b_1 \\
+a_{21}x_1 + a_{22}x_2 + \cdots + a_{2n}x_n &= b_2 \\
+&\;\vdots \\
+a_{n1}x_1 + a_{n2}x_2 + \cdots + a_{nn}x_n &= b_n
+\end{aligned}
+$$
+
+Esta es la **forma estándar**. Hay $n$ ecuaciones y $n$ incógnitas, y cada símbolo
+tiene un significado preciso:
+
+| Símbolo | Qué es | Cuántos hay |
+|---|---|---|
+| $n$ | Número de ecuaciones = número de incógnitas (sistema *cuadrado*) | 1 valor |
+| $x_1, x_2, \dots, x_n$ | Las **incógnitas**: lo que queremos calcular | $n$ |
+| $a_{ij}$ | **Coeficiente**: el número que multiplica a $x_j$ en la ecuación $i$ | $n \times n$ |
+| $b_i$ | **Término independiente**: el número conocido del lado derecho de la ecuación $i$ | $n$ |
+
+El doble subíndice de $a_{ij}$ no es casual: el **primer** índice dice *en qué
+ecuación* está (el renglón) y el **segundo**, *a qué incógnita* acompaña (la
+columna). Así, $a_{23}$ es el coeficiente que multiplica a $x_3$ en la segunda
+ecuación.
+
+Un ejemplo con $n = 3$ para fijar ideas:
+
+$$
+\begin{aligned}
+2x_1 + 1x_2 - 1x_3 &= 8 \\
+-3x_1 - 1x_2 + 2x_3 &= -11 \\
+-2x_1 + 1x_2 + 2x_3 &= -3
+\end{aligned}
+$$
+
+Aquí $a_{11}=2$, $a_{12}=1$, $a_{13}=-1$, $b_1=8$, y así sucesivamente. Este
+sistema de $3\times3$ se retomará en el subtema 1.2.
+
+#### De la forma estándar a la forma matricial
+
+Al escribir las ecuaciones una debajo de otra salta a la vista un patrón: las
+incógnitas $x_1, x_2, \dots, x_n$ aparecen **en el mismo orden en todas las
+ecuaciones**. Eso permite separar los datos (los números) de las incógnitas
+(las letras) y escribir el sistema tres veces más compacto:
+
+1. Se toman los coeficientes de cada ecuación, en orden, y se coloca cada
+   ecuación en un renglón. Eso forma la **matriz de coeficientes** $\mathbf{A}$.
+2. Las incógnitas se ponen en una sola columna: el **vector de incógnitas**
+   $\mathbf{x}$.
+3. Los términos independientes se ponen en otra columna: el **vector de términos
+   independientes** $\mathbf{b}$.
+
+$$
+\underbrace{\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{n1} & a_{n2} & \cdots & a_{nn}
+\end{bmatrix}}_{\mathbf{A}\;(n\times n)}
+\;
+\underbrace{\begin{bmatrix}
+x_1 \\ x_2 \\ \vdots \\ x_n
+\end{bmatrix}}_{\mathbf{x}\;(n\times 1)}
+=
+\underbrace{\begin{bmatrix}
+b_1 \\ b_2 \\ \vdots \\ b_n
+\end{bmatrix}}_{\mathbf{b}\;(n\times 1)}
+$$
+
+es decir,
+
+$$\mathbf{A}\mathbf{x} = \mathbf{b}.$$
+
+#### ¿Por qué la forma matricial dice lo mismo?
+
+Porque al multiplicar una matriz por un vector, **cada renglón produce una
+ecuación**. Con un caso $2\times 2$ se ve sin lugar a dudas:
+
+$$
+\begin{bmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{bmatrix}
+\begin{bmatrix} x_1 \\ x_2 \end{bmatrix}
+=
+\begin{bmatrix}
+a_{11}x_1 + a_{12}x_2 \\
+a_{21}x_1 + a_{22}x_2
+\end{bmatrix}
+=
+\begin{bmatrix} b_1 \\ b_2 \end{bmatrix}.
+$$
+
+El primer renglón del resultado es exactamente la primera ecuación de la forma
+estándar y el segundo renglón es la segunda ecuación. En general, el renglón $i$
+del producto $\mathbf{A}\mathbf{x}$ es
+
+$$a_{i1}x_1 + a_{i2}x_2 + \cdots + a_{in}x_n,$$
+
+que es justamente la ecuación $i$. Por eso $\mathbf{A}\mathbf{x} = \mathbf{b}$
+y la forma estándar son **el mismo sistema**, solo escrito de otra manera.
+
+> 💡 **Interpretación geométrica (interactiva).** En el [Cuaderno 01](../../notebooks/U3_01_Algebra_Lineal.ipynb), sección 7, puedes girar con el ratón dos rectas que se cruzan en un punto (2 ecuaciones, 2 incógnitas) y tres planos que se cruzan en un punto (3 ecuaciones, 3 incógnitas). Ahí se explica por qué con cientos o miles de ecuaciones ya no se puede dibujar.
+
+#### La matriz aumentada
+
+Resolver el sistema exige hacer **operaciones elementales de renglón**:
+intercambiar dos renglones, o restar a un renglón un múltiplo de otro. Ninguna de
+las dos cambia la solución, pero ambas afectan también al lado derecho. Para no
+olvidar esa parte, se pega $\mathbf{b}$ a la derecha de $\mathbf{A}$, separado
+por una línea vertical, y se forma la **matriz aumentada**:
+
+$$
+[\mathbf{A}\mid\mathbf{b}] = \begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} & \mid & b_1 \\
+a_{21} & a_{22} & \cdots & a_{2n} & \mid & b_2 \\
 \vdots & \vdots & \ddots & \vdots & \mid & \vdots \\
-a_{n1} & a_{n2} & \dots & a_{nn} & \mid & b_n
-\end{bmatrix}.$$
+a_{n1} & a_{n2} & \cdots & a_{nn} & \mid & b_n
+\end{bmatrix}.
+$$
 
-De aquí en adelante se trabaja siempre sobre $[\mathbf{A}\mid\mathbf{b}]$ y nunca sobre $\mathbf{A}$ sola.
+Todo el método de Gauss trabaja sobre esta matriz: los coeficientes a la
+izquierda de la línea y los términos independientes a la derecha. De aquí en
+adelante se opera siempre sobre $[\mathbf{A}\mid\mathbf{b}]$ y nunca sobre
+$\mathbf{A}$ sola.
 
 **🧮 Ejemplo algebraico.** Con un sistema $2\times 2$ genérico,
 
@@ -43,7 +162,8 @@ $$[\mathbf{A}\mid\mathbf{b}] = \begin{bmatrix} a_{11} & a_{12} & \mid & b_1 \\ a
 
 El renglón 1 representa $a_{11}x_1 + a_{12}x_2 = b_1$ y el renglón 2, $a_{21}x_1 + a_{22}x_2 = b_2$. Despejando la primera incógnita del primer renglón queda $x_1 = (b_1 - a_{12}x_2)/a_{11}$, válido solo si $a_{11} \neq 0$.
 
-**🔢 Versión con enteros (paso a paso).** Se usa en todo el documento
+**🔢 Versión con enteros (paso a paso).** Para este primer ejemplo, un sistema
+$2\times2$ sencillo:
 
 $$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 4 \\ 7 \end{bmatrix}.$$
 
