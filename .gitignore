@@ -31,3 +31,6 @@ _tmp_*.py
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Historial local de envios del motor de calificacion
+config/.envios.json
