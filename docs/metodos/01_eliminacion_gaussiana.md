@@ -623,7 +623,7 @@ Con números concretos:
 | $n$ | Eliminación (exacta) | $\approx\frac{2}{3}n^{3}$ | Sustitución ($n^2$) |
 |---:|---:|---:|---:|
 | 3 | 19 | 18 | 9 |
-| 10 | 645 | 667 | 100 |
+| 10 | 705 | 667 | 100 |
 | 1\,000 | 667\,165\,500 | 666\,666\,667 | 1\,000\,000 |
 
 La consecuencia práctica: **duplicar** $n$ multiplica el trabajo de eliminación
