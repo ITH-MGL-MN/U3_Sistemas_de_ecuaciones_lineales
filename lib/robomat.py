@@ -209,14 +209,16 @@ class _CreadorMatriz:
 
 
 class _CreadorIdentidad:
-    """I[4] -> eye(4); I[3, 4] -> eye(3, 4)."""
+    """I[4] -> eye(4); I[3, 4] -> identidad rectangular eye(3, 4)."""
 
     def __getitem__(self, dims):
-        if isinstance(dims, int):
-            return np.eye(dims)
+        if isinstance(dims, (int, np.integer)):
+            return np.eye(int(dims))
         if isinstance(dims, tuple) and len(dims) == 2:
-            return np.eye(dims[0], dims[1])
-        raise ValueError('Usa I[n] o I[m, n]')
+            return np.eye(int(dims[0]), int(dims[1]))
+        raise ValueError(
+            'Usa I[n] para la identidad n x n, o I[m, n] para la rectangular. '
+            'Para desplazar la diagonal usa eye(m, n, k).')
 
 
 M = _CreadorMatriz()
