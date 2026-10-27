@@ -38,6 +38,10 @@ se concatenan. ``M[[A, b]]`` = ``[A, b]`` (horizontal), ``M[[A], [B]]`` = ``[A; 
 No uses ``c_`` ni ``r_`` de NumPy: fallan con símbolos y anidan en vez de
 concatenar. Si necesitas llamar la operación directamente, están
 ``apilar_columnas``/``horzcat`` y ``apilar_filas``/``vertcat``.
+
+Autocalificación: ``verificar(respuesta, esperado)`` compara el VALOR sin importar
+el tipo (ndarray, lista, Matrix o MatrizRobomat) y ``calificar([...], [...])``
+devuelve una lista de 1/0 lista para enviar al Apps Script.
 """
 
 # ============================================================
@@ -576,6 +580,100 @@ def _bloque_matriz(x):
     if isinstance(x, sym.MatrixBase):
         return MatrizRobomat(x)
     return sym.Matrix([[x]])
+
+
+# =====================================================================
+# Verificación de respuestas (para ejercicios autocalificables)
+# =====================================================================
+
+def _a_matriz_simbolica(x):
+    """Convierte cualquier forma razonable de escribir una matriz a sym.Matrix."""
+    if isinstance(x, MatrizRobomat):
+        return sym.Matrix(x)
+    if isinstance(x, sym.MatrixBase):
+        return sym.Matrix(x)
+    if isinstance(x, np.ndarray):
+        return sym.Matrix(np.atleast_2d(x).tolist())
+    if isinstance(x, (list, tuple)):
+        a = np.array(x, dtype=object)
+        if a.ndim == 1:
+            return sym.Matrix([list(a)])
+        return sym.Matrix(a.tolist())
+    return sym.Matrix([[x]])
+
+
+def _expresiones_equivalentes(a, b, tol=1e-9):
+    """¿Las expresiones a y b valen lo mismo? Prueba simbólico y luego numérico."""
+    try:
+        if sym.simplify(a - b) == 0:
+            return True
+        if sym.simplify(sym.trigsimp(sym.expand(a - b))) == 0:
+            return True
+    except Exception:
+        pass
+    libres = sorted(a.free_symbols | b.free_symbols, key=str)
+    if not libres:
+        return False
+    rng = np.random.default_rng(0)
+    for _ in range(20):
+        vals = {s: sym.Float(rng.uniform(0.3, 2.7)) for s in libres}
+        try:
+            va, vb = complex(a.subs(vals)), complex(b.subs(vals))
+        except Exception:
+            return False
+        if abs(va - vb) > tol * max(1.0, abs(va)):
+            return False
+    return True
+
+
+def verificar(respuesta, esperado, tol=1e-6):
+    """Compara la respuesta del alumno con la esperada. Devuelve True/False.
+
+    No importa **cómo** se escribió la respuesta: acepta una matriz de NumPy, una
+    lista de listas, una matriz de SymPy o una MatrizRobomat. Se compara el valor,
+    no el tipo.
+
+        verificar(M[[1, 2], [3, 4]], M[[1, 2], [3, 4]])   -> True
+        verificar([[1, 2], [3, 4]], M[[1, 2], [3, 4]])    -> True
+        verificar(M[[1, 2], [3, 5]], M[[1, 2], [3, 4]])   -> False
+
+    Para números usa una tolerancia relativa (tol); para expresiones con letras
+    comprueba equivalencia algebraica, y si no lo logra, evalúa en puntos de
+    prueba.
+    """
+    try:
+        r = _a_matriz_simbolica(respuesta)
+        e = _a_matriz_simbolica(esperado)
+    except Exception:
+        return False
+    if r.shape != e.shape:
+        return False
+    for i in range(r.rows):
+        for j in range(r.cols):
+            a, b = r[i, j], e[i, j]
+            if a == b:
+                continue
+            # ambos numéricos: comparar con tolerancia relativa
+            if not (a.free_symbols or b.free_symbols):
+                try:
+                    va, vb = complex(a), complex(b)
+                except Exception:
+                    return False
+                if abs(va - vb) > tol * max(1.0, abs(vb)):
+                    return False
+                continue
+            # al menos uno simbólico
+            if not _expresiones_equivalentes(a, b):
+                return False
+    return True
+
+
+def calificar(respuestas, esperados, tol=1e-6):
+    """Califica una lista de respuestas. Devuelve [1, 0, ...] listo para enviar.
+
+        calificar([r1, r2, r3], [e1, e2, e3])   -> [1, 0, 1]
+    """
+    return [1 if verificar(r, e, tol) else 0 for r, e in zip(respuestas, esperados)]
 
 
 def horzcat(*bloques):
