@@ -18,8 +18,12 @@ __pycache__/
 build/
 *.pdf
 
-# Grader (ofuscado) y temporales
-grader_ofuscado.txt
+# Clave de respuestas: NO se sube al repositorio público. El alumno recibe
+# solo el blob, que ya trae el banco incrustado (ver tools/build_grader.py).
+lib/grader_u3.py
+config/preguntas_u3.yaml
+
+# Temporales
 _tmp_*.py
 *.tmp
 

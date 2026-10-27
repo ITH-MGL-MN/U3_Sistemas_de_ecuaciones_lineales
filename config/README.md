@@ -54,10 +54,57 @@ WEBHOOK_TOKEN   = "el-token-que-imprimio-setupWebhookToken"
 | `u3_equipo` | `{NC}` | estado del equipo (o `null`) |
 | `u3_eliminar` | `{NC_Jefe, confirmar:true}` | borra el equipo (solo para corregir) |
 
-Las calificaciones de laboratorio usan la acción estándar `guardar`
-(la misma de `procesarTarea.gs`), con `tarea = "U3_02_Laboratorios"`.
+Las calificaciones usan la acción estándar `guardar` (la misma de
+`procesarTarea.gs`). El campo `tarea` del payload es el **id del cuaderno** que
+envía, y define la pestaña donde se guarda:
 
-## 5. Verificar
+| Cuaderno | `tarea` |
+|---|---|
+| 01 · Álgebra Lineal | `U3_01_Algebra_Lineal` |
+| 02 · Laboratorios de Métodos | `U3_02_Laboratorios` |
+
+> El id viaja en el payload desde la constante `_TAREA_ID` del motor, **no** se
+> lee de `config.yaml`. Si se leyera, el Cuaderno 01 escribiría en la pestaña
+> del Cuaderno 02.
+
+## 5. El motor de calificación
+
+El cuaderno **no** trae las respuestas: se las pide a un motor empaquetado.
+
+| Archivo | ¿Va al repo público? | Para qué |
+|---|---|---|
+| [`lib/grader_u3.py`](../lib/grader_u3.py) | ❌ no (`gitignore`) | fuente del motor; se edita aquí |
+| [`config/preguntas_u3.yaml`](preguntas_u3.yaml) | ❌ no (`gitignore`) | banco de opción múltiple |
+| `grader_ofuscado.txt` | ✅ sí | **lo que usa el alumno** (base64 + zlib, con el banco incrustado) |
+| [`tools/build_grader.py`](../tools/build_grader.py) | ✅ sí | genera el blob |
+
+> La ofuscación no es cifrado: frena el vistazo casual, no a quien se proponga
+> descomprimirlo. El anti-copia de verdad son **los datos sembrados por NC**: a
+> cada alumno le tocan matrices distintas, así que copiar la respuesta del
+> compañero da mal.
+
+### Reconstruir el blob
+
+Cada vez que cambies el motor o el banco:
+
+```powershell
+.\.venv\Scripts\python.exe tools\build_grader.py
+```
+
+El script verifica que el motor compile, que al ejecutarse incruste el banco y
+que el blob se descomprima igual antes de darlo por bueno. **Si no lo corres, el
+alumno sigue recibiendo la versión vieja.**
+
+### Modos de carga
+
+| `MODO_MOTOR` | Cuándo | Qué hace |
+|---|---|---|
+| `"modulos"` | tu computadora | importa `lib/grader_u3.py`; Pylance lo entiende (F12, autocompletado, puntos de ruptura) |
+| `"blob"` | Colab (forzado) | descomprime `grader_ofuscado.txt` |
+
+En un clon sin `lib/grader_u3.py` el cuaderno cae solo a `"blob"`.
+
+## 6. Verificar
 
 Desde el Cuaderno 03, con el backend configurado:
 

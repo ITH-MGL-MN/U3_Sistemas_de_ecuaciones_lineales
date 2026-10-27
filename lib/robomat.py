@@ -40,8 +40,8 @@ concatenar. Si necesitas llamar la operación directamente, están
 ``apilar_columnas``/``horzcat`` y ``apilar_filas``/``vertcat``.
 
 Autocalificación: ``verificar(respuesta, esperado)`` compara el VALOR sin importar
-el tipo (ndarray, lista, Matrix o MatrizRobomat) y ``calificar([...], [...])``
-devuelve una lista de 1/0 lista para enviar al Apps Script.
+el tipo (ndarray, lista, Matrix o MatrizRobomat) y ``revisar([...], [...])``
+devuelve una lista de 1/0.
 """
 
 # ============================================================
@@ -668,10 +668,14 @@ def verificar(respuesta, esperado, tol=1e-6):
     return True
 
 
-def calificar(respuestas, esperados, tol=1e-6):
-    """Califica una lista de respuestas. Devuelve [1, 0, ...] listo para enviar.
+def revisar(respuestas, esperados, tol=1e-6):
+    """Revisa una lista de respuestas. Devuelve [1, 0, ...] listo para enviar.
 
-        calificar([r1, r2, r3], [e1, e2, e3])   -> [1, 0, 1]
+        revisar([r1, r2, r3], [e1, e2, e3])   -> [1, 0, 1]
+
+    Ojo: NO se llama ``calificar`` a propósito. Ese nombre lo usa el motor de la
+    tarea (``calificar()``, sin argumentos) para calificar la tarea completa, y
+    dos funciones distintas con el mismo nombre se pisan al importar.
     """
     return [1 if verificar(r, e, tol) else 0 for r, e in zip(respuestas, esperados)]
 

@@ -10,8 +10,10 @@
 #  aquí y reemplázalos en el motor (grader) o vía config local.
 # =====================================================================
 tarea:
-  # `id` es el nombre de la PESTAÑA de la hoja de cálculo para la
-  # calificación de laboratorios (el Apps Script la crea sola).
+  # `id` es el nombre de la PESTAÑA de la hoja de cálculo donde el Apps
+  # Script guarda los laboratorios. Cada cuaderno manda su propio id en el
+  # campo `tarea` del payload (el motor lo toma de su constante _TAREA_ID),
+  # así que este valor documenta la pestaña principal, no la impone.
   id: "U3_02_Laboratorios"
   nombre: "Unidad 3 - Laboratorios de Métodos (sistemas lineales)"
   materia: "Métodos Numéricos"
