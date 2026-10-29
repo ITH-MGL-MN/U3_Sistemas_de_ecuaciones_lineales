@@ -215,48 +215,20 @@ denominador.
 
 #### Cómo leer el superíndice
 
-> 📖 El superíndice **no es una potencia**: es el **número de paso** del
-> algoritmo. $a_{22}^{(2)}$ se lee «$a_{22}$ con el valor que tiene en el paso 2».
+> 📖 El superíndice **no es una potencia**: es el **número de paso**.
+> $a_{22}^{(2)}$ se lee «$a_{22}$ con el valor que tiene en el paso 2».
 
-En $a_{kk}^{(k)}$ hay tres $k$, y son tres cosas distintas:
+En $a_{kk}^{(k)}$ las tres $k$ son renglón, columna y paso; coinciden porque el
+método recorre la diagonal. El superíndice hace falta porque **el valor cambia**:
+en el sistema de ejemplo $a_{22}$ vale $-1$ al empezar y $1/2$ después del primer
+paso. Por eso se escribe
 
-| Posición | Qué indica | Por qué vale $k$ |
-|---|---|---|
-| primer subíndice | renglón | en el paso $k$ el pivote está en el renglón $k$ |
-| segundo subíndice | columna | …y en la columna $k$, o sea en la diagonal |
-| superíndice | paso | …y estamos en el paso $k$ |
+$$m_{32} = \frac{a_{32}^{(2)}}{a_{22}^{(2)}} = \frac{2}{1/2} = 4,$$
 
-Coinciden las tres solo porque el método recorre la diagonal: en el paso $k$ se
-elimina la incógnita $k$ usando el renglón $k$. No hay nada más profundo.
+y no $1/(-1) = -1$, que saldría de usar los valores viejos.
 
-#### Por qué hace falta el superíndice
-
-Porque **el valor de un elemento cambia de un paso a otro**, y sin el superíndice
-$a_{22}$ sería ambiguo. Para el sistema de ejemplo de este subtema, estos son los
-valores **al empezar** cada paso:
-
-| elemento | paso 1 | paso 2 | paso 3 |
-|---|---|---|---|
-| $a_{11}$ | $2$ | $2$ | $2$ |
-| $a_{21}$ | $-3$ | $0$ | $0$ |
-| $a_{22}$ | $-1$ | $\mathbf{1/2}$ | $1/2$ |
-| $a_{32}$ | $1$ | $2$ | $0$ |
-| $a_{33}$ | $2$ | $1$ | $-1$ |
-
-Mira $a_{22}$: empieza en $-1$ y en el paso 2 vale $1/2$. Por eso, cuando se
-escribe
-
-$$m_{32} = \frac{a_{32}^{(2)}}{a_{22}^{(2)}} = \frac{2}{1/2} = 4$$
-
-se está diciendo «con los valores **del paso 2**». Con los valores originales
-sería $1/(-1) = -1$, que es otra cosa. Sin el superíndice, esa fórmula sería
-falsa.
-
-#### Y el orden de los subíndices del multiplicador
-
-En $m_{ik}$ también hay trampa: el **primero** ($i$) es el renglón que **se
-modifica** y el **segundo** ($k$) es el renglón **pivote**. Es $m_{ik}$, no
-$m_{ki}$.
+Y ojo con el orden: en $m_{ik}$, $i$ es el renglón que **se modifica** y $k$ el
+renglón **pivote**. Es $m_{ik}$, no $m_{ki}$.
 
 #### El algoritmo con $n$ ecuaciones
 
