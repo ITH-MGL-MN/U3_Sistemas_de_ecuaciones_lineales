@@ -63,7 +63,7 @@ $$
 $$
 
 Aquí $a_{11}=2$, $a_{12}=1$, $a_{13}=-1$, $b_1=8$, y así sucesivamente. Este
-sistema de $3\times3$ se retomará en el subtema 1.2.
+sistema de $3\times3$ se retomará en el [subtema 1.2](#sec-1-2).
 
 #### De la forma estándar a la forma matricial
 
@@ -261,10 +261,10 @@ $$
 
 Eso es lo que se buscaba, porque la **última** ecuación ya tiene una sola
 incógnita ($u_{nn}x_n = d_n$): se despeja de inmediato y luego se sube renglón
-por renglón. De eso se encarga el subtema 1.4.
+por renglón. De eso se encarga el [subtema 1.4](#sec-1-4).
 
 > ⚠️ En este subtema se supone que **todos los pivotes son distintos de cero**.
-> Si alguno vale cero o es muy pequeño, hace falta lo del subtema 1.3 (pivoteo).
+> Si alguno vale cero o es muy pequeño, hace falta lo del [subtema 1.3](#sec-1-3) (pivoteo).
 
 **🧮 Ejemplo algebraico.** En un sistema $2\times2$ hay un solo paso. El pivote es
 $a_{11}$ y el multiplicador $m_{21} = a_{21}/a_{11}$. Al restar
@@ -325,7 +325,7 @@ $$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & \tfrac{1}{2} & \tfrac{1}{2} \\ 
 
 5. **Comprobación:** los pivotes usados fueron $2$, $\tfrac{1}{2}$ y $-1$. Ninguno
    es cero, así que la eliminación corrió completa. La solución
-   $\mathbf{x} = [2,\ 3,\ -1]$ se obtiene en el subtema 1.4.
+   $\mathbf{x} = [2,\ 3,\ -1]$ se obtiene en el [subtema 1.4](#sec-1-4).
 
 ---
 
@@ -333,7 +333,7 @@ $$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & \tfrac{1}{2} & \tfrac{1}{2} \\ 
 
 **📘 Teoría.**
 
-El subtema 1.2 supuso que todos los pivotes son distintos de cero. Eso no siempre
+El [subtema 1.2](#sec-1-2) supuso que todos los pivotes son distintos de cero. Eso no siempre
 se cumple, y cuando falla el método se rompe. Hay dos maneras de fallar.
 
 #### Falla 1: un pivote igual a cero
@@ -460,7 +460,7 @@ $$\mathbf{A} = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix},
 4. **Ahora el pivote es $1$**, distinto de cero, y se puede eliminar:
    $m_{21} = 0/1 = 0$. Restar cero veces el renglón 1 no cambia nada, así que la
    matriz ya quedó triangular.
-5. **Solución** (se detalla en el subtema 1.4): de la última ecuación
+5. **Solución** (se detalla en el [subtema 1.4](#sec-1-4)): de la última ecuación
    $1\cdot x_2 = 1$ se obtiene $x_2 = 1$; y del primer renglón,
    $x_1 + x_2 = 3 \Rightarrow x_1 = 2$.
 6. **Comprobación:** $\mathbf{x} = [2,\ 1]$ satisface el sistema original
@@ -526,7 +526,7 @@ empezar por abajo se tiene **una** incógnita por ecuación.
 #### Costo
 
 Esta fase requiere del orden de $n^2$ operaciones, mucho menos que las
-$\tfrac{2}{3}n^3$ de la eliminación. El detalle está en el subtema 1.5.
+$\tfrac{2}{3}n^3$ de la eliminación. El detalle está en el [subtema 1.5](#sec-1-5).
 
 **🧮 Ejemplo algebraico.** Para un sistema $2\times2$ ya triangular,
 
@@ -541,7 +541,7 @@ $$x_2 = \frac{b_2'}{a_{22}'}, \qquad x_1 = \frac{b_1 - a_{12}x_2}{a_{11}}.$$
 La primera división exige $a_{22}' \neq 0$ y la segunda, $a_{11} \neq 0$.
 
 **🔢 Versión con enteros (paso a paso).** Se parte de la forma triangular
-obtenida en el subtema 1.2:
+obtenida en el [subtema 1.2](#sec-1-2):
 
 $$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & \tfrac{1}{2} & \tfrac{1}{2} \\ 0 & 0 & -1 \end{bmatrix},
 \qquad \mathbf{d} = \begin{bmatrix} 8 \\ 1 \\ 1 \end{bmatrix}.$$
@@ -652,7 +652,7 @@ se ve de dónde salen los dos términos: el cúbico $\frac{2}{3}n^3$ y el cuadr�
 $O(n^2)$, que para $n$ grande queda opacado por el primero.
 
 **🔢 Versión con enteros (paso a paso).** Con $n = 3$ se puede contar a mano,
-usando el mismo sistema del subtema 1.2:
+usando el mismo sistema del [subtema 1.2](#sec-1-2):
 
 1. **Paso $k=1$:** hay $n-k = 2$ renglones por eliminar. Cada uno cuesta
    $2(2)+3 = 7$ FLOPs (1 del multiplicador, $2\cdot2 = 4$ de los coeficientes y 2
