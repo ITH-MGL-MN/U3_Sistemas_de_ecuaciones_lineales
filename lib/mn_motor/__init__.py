@@ -38,6 +38,7 @@ __all__ = [
     'pregunta',
     'semilla_de',
     'ultimo_envio',
+    'usar_cuaderno',
     'ver_preguntas',
     'MAX_INTENTOS',
 ]
@@ -47,3 +48,18 @@ def cuaderno():
     """Nombre de la carpeta de preguntas que se está usando."""
     import mn_motor.ajustes as ajustes
     return ajustes.CUADERNO
+
+
+def usar_cuaderno(nombre, tarea_id=None):
+    """Declara qué cuaderno se califica. Lo llama la celda 1 de cada cuaderno.
+
+    Hace falta porque el paquete ``preguntas/`` tiene una carpeta por cuaderno y
+    el motor no puede adivinar cuál es: en modo blob lo trae incrustado, pero en
+    modo módulos hay que decírselo. También fija el id de la pestaña del backend,
+    para que el Cuaderno 02 no escriba en la del 01.
+    """
+    import mn_motor.ajustes as ajustes
+    ajustes.CUADERNO = nombre
+    if tarea_id:
+        ajustes.TAREA_ID = tarea_id
+    return nombre

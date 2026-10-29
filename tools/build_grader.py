@@ -33,8 +33,13 @@ PREGUNTAS = os.path.join(RAIZ, 'preguntas')
 
 # Nombre de la pestaña del backend por cuaderno. El id viaja en el payload y
 # define dónde se guarda la calificación.
+# Un cuaderno = una carpeta de preguntas = un blob. El `tarea_id` es la pestaña
+# del backend donde se guarda la calificación de ese cuaderno.
 CUADERNOS = {
     'u3_01_algebra_lineal': {'tarea_id': 'U3_01_Algebra_Lineal'},
+    'u3_02_gaussiana': {'tarea_id': 'U3_02_Eliminacion_Gaussiana'},
+    'u3_03_lu': {'tarea_id': 'U3_03_Descomposicion_LU'},
+    'u3_04_especiales_iterativos': {'tarea_id': 'U3_04_Especiales_Iterativos'},
 }
 
 _COLA = '''
@@ -180,61 +185,80 @@ def _verificar(codigo, cuaderno, tarea_id):
     return len(tarea['preguntas']), ns['cuaderno']()
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--cuaderno', default='u3_01_algebra_lineal',
-                    choices=sorted(CUADERNOS),
-                    help='carpeta de preguntas a empaquetar')
-    ap.add_argument('--salida', default=None,
-                    help='archivo de salida (por defecto grader_ofuscado.txt)')
-    args = ap.parse_args()
-
-    carpeta = os.path.join(PREGUNTAS, args.cuaderno)
+def construir_blob(cuaderno, salida=None, verboso=True):
+    """Empaqueta un cuaderno. Devuelve (ok, mensaje)."""
+    carpeta = os.path.join(PREGUNTAS, cuaderno)
     if not os.path.isdir(carpeta):
-        print(f'No existe la carpeta de preguntas: {carpeta}', file=sys.stderr)
-        return 1
+        return False, f'no existe preguntas/{cuaderno}/'
 
     modulos = _leer_py(MOTOR, 'mn_motor')
     # El paquete raíz de preguntas también va (es solo su docstring).
     with open(os.path.join(PREGUNTAS, '__init__.py'), encoding='utf-8') as f:
         modulos['preguntas'] = f.read()
-    modulos.update(_leer_py(carpeta, 'preguntas.' + args.cuaderno))
-    recursos = _leer_recursos(carpeta, 'preguntas/' + args.cuaderno + '/')
+    modulos.update(_leer_py(carpeta, 'preguntas.' + cuaderno))
+    recursos = _leer_recursos(carpeta, 'preguntas/' + cuaderno + '/')
 
-    if 'preguntas.' + args.cuaderno not in modulos:
-        print(f'Falta preguntas/{args.cuaderno}/__init__.py', file=sys.stderr)
-        return 1
+    if 'preguntas.' + cuaderno not in modulos:
+        return False, f'falta preguntas/{cuaderno}/__init__.py'
 
+    tarea_id = CUADERNOS[cuaderno]['tarea_id']
     codigo = _COLA.format(
-        modulos=modulos,
-        recursos=recursos,
-        cuaderno=args.cuaderno,
-        tarea_id=CUADERNOS[args.cuaderno]['tarea_id'],
+        modulos=modulos, recursos=recursos, cuaderno=cuaderno, tarea_id=tarea_id,
     )
 
     try:
-        n_preguntas, cuaderno = _verificar(codigo, args.cuaderno,
-                                           CUADERNOS[args.cuaderno]['tarea_id'])
+        n_preguntas, _ = _verificar(codigo, cuaderno, tarea_id)
     except Exception as exc:
-        print(f'⛔ El paquete no funciona: {exc!r}', file=sys.stderr)
-        return 1
+        return False, f'el paquete no funciona: {exc!r}'
 
     blob = base64.b64encode(zlib.compress(codigo.encode('utf-8'), 9)).decode('ascii')
-    salida = args.salida or os.path.join(RAIZ, 'grader_ofuscado.txt')
-    with open(salida, 'w', encoding='utf-8', newline='\n') as f:
+    destino = salida or os.path.join(RAIZ, 'grader', cuaderno + '.txt')
+    os.makedirs(os.path.dirname(destino), exist_ok=True)
+    with open(destino, 'w', encoding='utf-8', newline='\n') as f:
         f.write(blob)
 
-    print(f'Cuaderno    : {cuaderno}')
-    print(f'Módulos     : {len(modulos)} ({len(_leer_py(MOTOR, "mn_motor"))} del motor)')
-    print(f'Recursos    : {len(recursos)} .md')
-    print(f'Preguntas   : {n_preguntas}')
-    print(f'Empaquetado : {len(codigo):,} caracteres')
-    print(f'Salida      : {salida} ({len(blob):,} caracteres)')
-    print(f'Ratio       : {len(blob)/len(codigo):.2f}x')
-
     vuelta = zlib.decompress(base64.b64decode(blob)).decode('utf-8')
-    assert vuelta == codigo, 'la descompresión no coincide'
-    print('Verificado: se descomprime igual, carga en memoria y califica todo bien.')
+    if vuelta != codigo:
+        return False, 'la descompresión no coincide'
+
+    if verboso:
+        print(f'{cuaderno}')
+        print(f'  preguntas   : {n_preguntas}')
+        print(f'  módulos     : {len(modulos)} · recursos: {len(recursos)}')
+        print(f'  empaquetado : {len(codigo):,} → {len(blob):,} caracteres '
+              f'({len(blob)/len(codigo):.2f}x)')
+        print(f'  salida      : {destino}')
+    return True, destino
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--cuaderno', default=None, choices=sorted(CUADERNOS),
+                    help='carpeta de preguntas a empaquetar (por omisión: todas las que existan)')
+    ap.add_argument('--salida', default=None,
+                    help='archivo de salida (por omisión: grader/<cuaderno>.txt)')
+    args = ap.parse_args()
+
+    if args.cuaderno:
+        lista = [args.cuaderno]
+    else:
+        lista = [c for c in CUADERNOS
+                 if os.path.isdir(os.path.join(PREGUNTAS, c))]
+        if not lista:
+            print('No hay ninguna carpeta de preguntas para empaquetar.', file=sys.stderr)
+            return 1
+
+    fallos = 0
+    for cuaderno in lista:
+        ok, msg = construir_blob(cuaderno, args.salida, verboso=True)
+        if not ok:
+            fallos += 1
+            print(f'⛔ {cuaderno}: {msg}', file=sys.stderr)
+        print()
+
+    if fallos:
+        return 1
+    print(f'Verificado: {len(lista)} blob(s) se descomprimen, cargan en memoria y califican todo bien.')
     return 0
 
 

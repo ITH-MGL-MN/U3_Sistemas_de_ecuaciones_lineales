@@ -75,8 +75,21 @@ El cuaderno **no** trae las respuestas: se las pide a un motor empaquetado.
 |---|---|---|
 | [`lib/mn_motor/`](../lib/mn_motor/) | ❌ no (`gitignore`) | el framework: mostrar, calificar, enviar |
 | [`preguntas/`](../preguntas/) | ❌ no (`gitignore`) | las preguntas de cada cuaderno (una carpeta por cuaderno) |
-| `grader_ofuscado.txt` | ✅ sí | **lo que usa el alumno** (base64 + zlib, con motor y preguntas dentro) |
-| [`tools/build_grader.py`](../tools/build_grader.py) | ✅ sí | genera el blob |
+| `grader/<cuaderno>.txt` | ✅ sí | **lo que usa el alumno** (base64 + zlib, con motor y preguntas dentro) |
+| [`tools/build_grader.py`](../tools/build_grader.py) | ✅ sí | genera los blobs |
+
+**Un cuaderno = una carpeta en `preguntas/` = un blob en `grader/`.**
+
+| Cuaderno | Carpeta | Blob | Pestaña (`tarea`) |
+|---|---|---|---|
+| 01 · Álgebra Lineal | `u3_01_algebra_lineal` | `grader/u3_01_algebra_lineal.txt` | `U3_01_Algebra_Lineal` |
+| 02 · Eliminación Gaussiana | `u3_02_gaussiana` | `grader/u3_02_gaussiana.txt` | `U3_02_Eliminacion_Gaussiana` |
+| 03 · Descomposición LU | `u3_03_lu` | `grader/u3_03_lu.txt` | `U3_03_Descomposicion_LU` |
+| 04 · Especiales e iterativos | `u3_04_especiales_iterativos` | `grader/u3_04_especiales_iterativos.txt` | `U3_04_Especiales_Iterativos` |
+
+Cada cuaderno declara el suyo en su primera celda con
+`usar_cuaderno("u3_02_gaussiana", "U3_02_Eliminacion_Gaussiana")`. Eso fija a la
+vez qué preguntas se cargan y en qué pestaña se guarda la calificación.
 
 > La ofuscación no es cifrado: frena el vistazo casual, no a quien se proponga
 > descomprimirlo. El anti-copia de verdad son **los datos sembrados por NC**: a
@@ -93,12 +106,19 @@ El cuaderno **no** trae las respuestas: se las pide a un motor empaquetado.
 | cómo se califican | `lib/mn_motor/califica.py` |
 | el envío al backend | `lib/mn_motor/envio.py` |
 
-### Reconstruir el blob
+### Reconstruir los blobs
 
 Cada vez que cambies el motor o cualquier pregunta:
 
 ```powershell
 .\.venv\Scripts\python.exe tools\build_grader.py
+```
+
+Sin `--cuaderno` regenera **todos** los que tengan carpeta de preguntas. Para uno
+solo:
+
+```powershell
+.\.venv\Scripts\python.exe tools\build_grader.py --cuaderno u3_02_gaussiana
 ```
 
 El script, **antes** de escribir nada, carga el paquete en memoria (igual que lo
@@ -114,6 +134,12 @@ alumno sigue recibiendo la versión vieja.**
 | `"blob"` | Colab (forzado) | descomprime `grader_ofuscado.txt` |
 
 En un clon sin `preguntas/` el cuaderno cae solo a `"blob"`.
+
+### ⚠️ Al probar, no ejecutes la celda de envío
+
+`enviar(alumno_id)` **manda de verdad** al Apps Script y consume uno de los 2
+intentos del NC. Para probar el cuaderno de punta a punta, borra o salta esa
+celda, o usa un NC de prueba. `calificar()` no envía nada: es seguro.
 
 ## 6. Verificar
 
