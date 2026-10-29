@@ -137,9 +137,13 @@ En un clon sin `preguntas/` el cuaderno cae solo a `"blob"`.
 
 ### ⚠️ Al probar, no ejecutes la celda de envío
 
-`enviar(alumno_id)` **manda de verdad** al Apps Script y consume uno de los 2
+`enviar(alumno_id)` **manda de verdad** al Apps Script y consume uno de los 5
 intentos del NC. Para probar el cuaderno de punta a punta, borra o salta esa
 celda, o usa un NC de prueba. `calificar()` no envía nada: es seguro.
+
+> El límite vive en `procesarTarea.gs` (`MAX_INTENTOS`). Si lo cambias ahí,
+> cámbialo también en `lib/mn_motor/ajustes.py` y en `config.yaml`, que solo
+> sirven para avisar al alumno antes de gastar el último.
 
 ## 6. Verificar
 

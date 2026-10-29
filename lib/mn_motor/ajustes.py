@@ -14,9 +14,9 @@ import os
 CUADERNO = 'u3_01_algebra_lineal'
 TAREA_ID = 'U3_01_Algebra_Lineal'
 
-# Envíos permitidos al backend. Lo impone el Apps Script, pero el motor lo
-# repite para poder avisar al alumno antes de gastar el último.
-MAX_INTENTOS = 2
+# Envíos permitidos al backend. Lo impone el Apps Script (procesarTarea.gs);
+# este valor solo sirve para avisar al alumno antes de gastar el último.
+MAX_INTENTOS = 5
 
 
 def raiz():

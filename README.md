@@ -1,106 +1,155 @@
 # ⚡ Unidad 3: Sistemas de Ecuaciones Lineales
 
 ## 🎯 Objetivo General
-Analizar, implementar y evaluar métodos numéricos directos e iterativos para la resolución de **sistemas de ecuaciones algebraicas lineales** $\mathbf{A}\mathbf{x} = \mathbf{b}$, aplicando herramientas de álgebra matricial, simulación estocástica de **Monte Carlo** y análisis de sensibilidad sobre casos reales de ingeniería (circuitos eléctricos, estructuras robóticas, redes de tuberías y balance de masa).
+
+Analizar, implementar y evaluar métodos numéricos **directos e iterativos** para
+resolver sistemas de ecuaciones algebraicas lineales $\mathbf{A}\mathbf{x} =
+\mathbf{b}$, con aritmética exacta cuando el método lo permite y flotante cuando
+no, y aplicarlos a casos reales de ingeniería (circuitos, estructuras, redes de
+tuberías, balance de masa).
 
 ---
 
-## 🗺️ Mapa de Navegación del Repositorio
+## 🧭 Los cuatro cuadernos
+
+La unidad se recorre en cuatro cuadernos. Cada uno mezcla teoría, laboratorio y
+preguntas calificables: **no hay documentos aparte que leer antes**; el cuaderno
+es autosuficiente.
+
+| # | Cuaderno | Qué se aprende |
+|---|---|---|
+| **01** | **Álgebra Lineal** | Construir matrices con sintaxis estilo MATLAB, operaciones de renglón, matriz aumentada, determinante, inversa, álgebra simbólica. |
+| **02** | **Eliminación Gaussiana** | Triangularizar un sistema, multiplicadores, sustitución hacia atrás, **pivoteo** (pivote cero y pivote diminuto), determinante y costo $O(n^3)$. |
+| **03** | **Descomposición LU** | Factorizar $\mathbf{A} = \mathbf{L}\mathbf{U}$ (Doolittle, Crout), reusar la factorización para varios $\mathbf{b}$, inversa. |
+| **04** | **Matrices Especiales y Métodos Iterativos** | Thomas y Cholesky primero; después Gauss-Seidel, Jacobi, relajación y convergencia. Cierra con las funciones de álgebra lineal que ya traen NumPy/SciPy/SymPy y una comparativa de cuándo conviene cada método. El orden sigue a Chapra. |
+
+---
+
+## 🗺️ Mapa del Repositorio
 
 ```text
-U3/
-├── README.md                      <-- Centro de mando e instrucciones generales
+U3_Repo/
+├── README.md                      <-- este archivo
 ├── docs/
-│   ├── metodos/                   <-- Guías teóricas completas con ecuaciones en LaTeX
+│   ├── metodos/                   <-- teoría de apoyo (el cuaderno ya la incluye)
 │   │   ├── 01_eliminacion_gaussiana.md
 │   │   ├── 02_descomposicion_lu.md
 │   │   ├── 03_metodos_iterativos.md
 │   │   ├── 04_matrices_especiales.md
 │   │   └── 05_comparativa.md
-│   └── casos/                     <-- Fichas técnicas de los 17 casos de ingeniería
-│       ├── casos_index.md
-│       └── caso_t01.md … caso_t17.md
-├── notebooks/                     <-- Cuadernos interactivos en Google Colab
-│   ├── U3_01_Algebra_Lineal.ipynb
-│   ├── U3_02_Laboratorios_Metodos.ipynb
-│   ├── U3_03_Seleccion_Casos.ipynb
-│   └── U3_04_Analisis_Casos.ipynb
-├── lib/                           <-- Helpers: matlab_like + robomat (fusión)
+│   └── casos/                     <-- banco de 17 casos de ingeniería
+├── notebooks/                     <-- los cuatro cuadernos
+├── lib/
+│   ├── robomat.py                 <-- biblioteca del curso (sintaxis MATLAB)
+│   └── mn_motor/                  <-- motor de calificación (no se publica)
+├── preguntas/                     <-- preguntas de cada cuaderno (no se publica)
+├── grader/                        <-- un blob por cuaderno: lo que usa el alumno
 ├── config/                        <-- config.yaml + guía del backend Apps Script
-└── reporte/                       <-- Plantilla LaTeX del reporte final
+├── tools/                         <-- build_grader.py
+└── reporte/                       <-- plantilla LaTeX de otra unidad (sin uso aquí)
 ```
 
 ---
 
-## 🚀 Cuadernos Interactivos en Google Colab
+## 🚀 Cómo se usan los cuadernos
 
-Haz clic en las insignias para abrir cada cuaderno en Google Colab.
+1. Abre el cuaderno en Google Colab.
+2. Ejecuta la **primera celda**: monta tu Drive, clona o actualiza el repositorio
+   en `MyDrive/CursoMN/U3_Repo` y carga la biblioteca y el motor.
+3. Ejecuta la celda de **identificación**: lee tu correo `@….tecnm.mx`, saca tu
+   Número de Control y genera **tus** preguntas. Cada alumno recibe matrices
+   distintas, así que copiar no sirve.
+4. Trabaja el cuaderno de arriba abajo. Las secciones de laboratorio no se
+   califican: ahí conviene romper cosas y experimentar.
+5. Al final, contesta las preguntas, ejecuta **Calificar** (no envía nada) y,
+   cuando estés conforme, **Enviar**.
 
-| # | Cuaderno / Actividad | Descripción y Alcance | Enlace Directo |
-|---|---|---|:---:|
-| **01** | **Álgebra Lineal** | Introducción práctica a matrices con `matlab_like` + `robomat` fusionados: construcción de matrices, operaciones de renglón, determinante, inversa y manipulación simbólica. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1aEIZ7s9Y9HbS9fnOVf3-42uq94VrnVcl) |
-| **02** | **Laboratorios de Métodos** | Laboratorios y prácticas sobre [los 4 métodos](docs/metodos/): Eliminación Gaussiana, LU, Gauss-Seidel y Thomas/Cholesky. Preguntas de opción múltiple y numéricas abiertas, comparación Python vs MATLAB (teórico). | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1eWIoYtyad4EM_7rcUaALZvfZoqwLdh0z) |
-| **03** | **Selección de Equipos y Casos** | Registro del equipo y asignación determinista del Caso de Estudio (T1–T17) mediante la semilla del Número de Control (NC). | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1CM18n8fFl5YmgiNKsCUSQqxRmF-9KbNs) |
-| **04** | **Análisis de Caso y Reporte** | Cada método implementado en un archivo `.py`, comparación versión manual vs `numpy`/`scipy`, y exportación de resultados/figuras para el reporte en LaTeX. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oczPp_-MehZ2mauySE4yYPiorykkFyGG) |
+### 📤 Intentos de envío
+
+| | |
+|---|---|
+| Calificar sin enviar | las veces que quieras |
+| **Envíos al profesor** | **5 como máximo** por cuaderno |
+
+El límite lo impone el backend (Apps Script); el motor solo avisa antes de gastar
+el último.
 
 ---
 
 ## 📚 Documentación Teórica por Método
 
-Consulta los archivos de documentación para estudiar las ecuaciones, diagramas de flujo e interpretación matemática necesaria para tu reporte y exposición:
+Los cuadernos ya traen la teoría completa. Estos archivos sirven para consultar
+las ecuaciones sin abrir el cuaderno, o para exponer:
 
 1. 📖 [**Eliminación Gaussiana y Pivoteo Parcial**](docs/metodos/01_eliminacion_gaussiana.md)
-   * Formación de la matriz aumentada $[\mathbf{A} \mid \mathbf{b}]$, factores de eliminación $m_{ik}$, estrategia de pivoteo por renglón y sustitución hacia atrás.
-2. 📖 [**Descomposición LU e Inversión de Matrices**](docs/metodos/02_descomposicion_lu.md)
-   * Factorización $\mathbf{A} = \mathbf{L}\mathbf{U}$ (Doolittle y Crout), resolución de $\mathbf{L}\mathbf{d} = \mathbf{b}$ y $\mathbf{U}\mathbf{x} = \mathbf{d}$, y cálculo de $\mathbf{A}^{-1}$.
-3. 📖 [**Métodos Iterativos: Gauss-Seidel y Relajación**](docs/metodos/03_metodos_iterativos.md)
-   * Despeje componente a componente, criterio de dominancia diagonal estricta y factor de relajación $\lambda$ (SOR).
+   * Matriz aumentada $[\mathbf{A}\mid\mathbf{b}]$, multiplicadores $m_{ik}$,
+     pivoteo por renglón y sustitución hacia atrás.
+2. 📖 [**Descomposición LU**](docs/metodos/02_descomposicion_lu.md)
+   * $\mathbf{A}=\mathbf{L}\mathbf{U}$ (Doolittle y Crout), resolución de
+     $\mathbf{L}\mathbf{d}=\mathbf{b}$ y $\mathbf{U}\mathbf{x}=\mathbf{d}$.
+3. 📖 [**Métodos Iterativos**](docs/metodos/03_metodos_iterativos.md)
+   * Despeje componente a componente, dominancia diagonal y relajación (SOR).
 4. 📖 [**Matrices Especiales: Thomas y Cholesky**](docs/metodos/04_matrices_especiales.md)
-   * Algoritmo de Thomas $O(n)$ para sistemas tridiagonales y factorización de Cholesky para matrices simétricas definidas positivas.
-5. 🔄 [**Referencias Cruzadas y Matriz Comparativa**](docs/metodos/05_comparativa.md)
-   * Tabla comparativa de complejidad, memoria, estabilidad y caso de uso ideal de cada método.
+   * Thomas $O(n)$ para tridiagonales y Cholesky para simétricas definidas
+     positivas.
+5. 🔄 [**Comparativa entre Métodos**](docs/metodos/05_comparativa.md)
+   * Complejidad, memoria, estabilidad y caso de uso ideal de cada uno.
 
 ---
 
-## 🏭 Casos de Estudio de Ingeniería
+## 🏭 Casos de Ingeniería
 
-Cada equipo trabajará sobre un problema real asignado en el **Cuaderno 03**. Consulta el [🗂️ índice completo de los 17 casos](docs/casos/casos_index.md), organizados por tamaño de equipo:
+Los casos se aplican **dentro de cada cuaderno**, en su sección final: un
+problema real resuelto con el método que se acaba de estudiar, comprobado de
+forma analítica (residual cero, verificación física) y con una discusión de
+**por qué ese método y no otro**.
 
-| Bloque | Integrantes | Casos | Temática |
+El [🗂️ banco completo de 17 casos](docs/casos/casos_index.md) queda como reserva
+para tareas y exámenes, organizado por tamaño de sistema:
+
+| Bloque | Tamaño | Casos | Temática |
 |:---:|:---:|:---:|---|
-| **A** | 2 | T1–T4 | Circuitos de malla, nodos, filtros RC y conducción térmica 1D ($3\times3$) |
-| **B** | 3 | T5–T9 | Cercha robótica, masa-resorte, viga, suspensión y reactores CSTR ($4\times4$) |
-| **C** | 4 | T10–T14 | Térmica 2D, tuberías, combustión, Leontief y destilación ($5\times5$–$6\times6$) |
-| **D** | 5 | T15–T16 | Cercha espacial 3D e intercambiadores de calor (mal condicionados) |
-| **E** | 6 | T17 | Flujo de carga DC en red de potencia ($8\times8$) |
+| **A** | $3\times3$ | T1–T4 | Circuitos de malla, nodos, filtros RC, conducción térmica 1D |
+| **B** | $4\times4$ | T5–T9 | Cercha robótica, masa-resorte, viga, suspensión, reactores CSTR |
+| **C** | $5\times5$–$6\times6$ | T10–T14 | Térmica 2D, tuberías, combustión, Leontief, destilación |
+| **D** | $6\times6$–$7\times7$ | T15–T16 | Cercha espacial 3D e intercambiadores (mal condicionados) |
+| **E** | $8\times8$ | T17 | Flujo de carga DC en red de potencia |
 
 ---
 
-## 💯 Criterios de Evaluación
+## 💯 Evaluación
 
-La **Mega Tarea Integradora de la Unidad 3** se evalúa mediante tres componentes:
+| Componente | Peso | Cómo se registra |
+|---|:---:|---|
+| Autograder de los cuadernos 01–04 | 100% | Envío automático a Google Sheets vía Apps Script |
 
-| Componente | Peso (%) | Formato de Entrega | Método de Registro |
-|---|:---:|---|---|
-| **Autograder de Teoría y Código** | **40%** | Cuadernos Colab 02 y 04 | Envío automático a Google Sheets vía Apps Script |
-| **Reporte Escrito en LaTeX** | **40%** | Documento PDF compilado en LaTeX | Entrega del `.tex` y PDF en la plataforma |
-| **Exposición del Caso de Estudio** | **20%** | Exposición de 5 minutos por equipo | Presencial/grabada, apoyada en la teoría del repositorio |
+No hay reporte en LaTeX ni exposición en esta unidad: se integrarán con las
+demás unidades en un proyecto final.
 
 ---
 
-## 🛠️ Herramientas y Requisitos
+## 🛠️ Herramientas
 
-No requieres instalar software adicional: el entorno de Colab carga automáticamente la librería personalizada (`matlab_like` + `robomat`) para simplificar las operaciones matriciales y simbólicas. La fusión vive en [`lib/`](lib/) y se precarga desde los cuadernos.
+No hay que instalar nada: la primera celda de cada cuaderno monta Drive, trae el
+repositorio y deja lista la biblioteca. La sintaxis es **estilo MATLAB**, con dos
+caminos para construir matrices:
 
 ```python
-# Carga directa del entorno enriquecido en Colab (ver lib/)
-import urllib.request
-url = "https://raw.githubusercontent.com/ITH-MGL-MN/U3_Sistemas_de_ecuaciones_lineales/main/lib/robomat.py"
-urllib.request.urlretrieve(url, "robomat.py")
-exec(open("robomat.py").read(), globals())
+A = M[[2, 1], [1, 3]]        # numérico (float64), como MATLAB por omisión
+A = M.sym[[2, 1], [1, 3]]    # exacto: enteros y fracciones (MatrizRobomat)
+
+A @ B      # producto matricial
+A * B      # producto elemento a elemento (el .* de MATLAB)
+mostrar(A) # pinta la matriz en LaTeX
 ```
+
+Para los métodos directos conviene `M.sym`: no hay error de redondeo y las
+fracciones se leen tal cual. `es_exacto(x)` dice si un resultado quedó sin
+ningún flotante.
 
 ---
 
-### 📩 Soporte y Dudas
-Si encuentras algún detalle en los algoritmos o cuadernos, abre un *Issue* en este repositorio o consulta las fechas límite registradas en la hoja de control de la materia.
+### 📩 Soporte
+
+Si encuentras un error en los algoritmos o en los cuadernos, abre un *Issue* en
+este repositorio.
