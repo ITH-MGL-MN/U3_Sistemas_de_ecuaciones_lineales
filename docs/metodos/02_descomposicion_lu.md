@@ -40,8 +40,11 @@ $$\mathbf{A} = \begin{bmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{bmat
 
 1. **Sin LU:** si aparecen dos vectores $\mathbf{b}$ distintos, se hacen **dos eliminaciones** completas, cada una de costo $O(n^{3})$.
 2. **Con LU:** se factoriza una vez y se resuelven **dos sustituciones** por cada $\mathbf{b}$, de costo $O(n^{2})$ cada una.
-3. Con $n=3$ la diferencia es pequeña, pero crece rápido: el ahorro aparece cuando hay muchos lados derechos o $n$ grande.
-4. Para cuantificar el ahorro falta el segundo vector $\mathbf{b}$: **falta: segundo vector $\mathbf{b}$**.
+3. Con $n=3$ la diferencia todavía no se nota, pero crece rápido. Tomando como medidas las multiplicaciones de la eliminación,
+4. Si el segundo lado derecho es $\mathbf{b}^{(2)} = [1,\ 2,\ 3]$, al resolverlo con la **misma** $\mathbf{L}$ y $\mathbf{U}$ se obtiene $\mathbf{y}^{(2)} = [1,\ 7/2,\ -10]$ y $\mathbf{x}^{(2)} = [7,\ -3,\ 10]$, sin volver a tocar $\mathbf{A}$.
+5. La cuenta del ahorro: hacer $k$ eliminaciones cuesta $k\,n^{3}/3$ multiplicaciones; factorizar una vez y sustituir $k$ veces cuesta $n^{3}/3 + k\,n^{2}$. Para $k=2$ la factorización empieza a ganar cuando $n > 6$: con $n=10$ son $667$ contra $533$, y con $n=100$, $666\,667$ contra $353\,333$.
+
+En resumen: **LU no ahorra en un sistema pequeño ni en un solo lado derecho**. Ahorra cuando la matriz se reutiliza.
 
 ---
 

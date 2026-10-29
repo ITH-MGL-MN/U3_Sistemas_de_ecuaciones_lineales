@@ -56,7 +56,7 @@ def practica(id_pregunta, tarea_=None):
         print('⏳ Tu función devolvió `None`: todavía no calcula nada.')
         return False
 
-    if comun.matriz_igual(res, esperado):
+    if comun.comparar(res, esperado):
         print('✅ Coincide con la referencia.')
         _mostrar(res)
         return True

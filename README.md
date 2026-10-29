@@ -138,9 +138,11 @@ caminos para construir matrices:
 A = M[[2, 1], [1, 3]]        # numérico (float64), como MATLAB por omisión
 A = M.sym[[2, 1], [1, 3]]    # exacto: enteros y fracciones (MatrizRobomat)
 
-A @ B      # producto matricial
-A * B      # producto elemento a elemento (el .* de MATLAB)
-mostrar(A) # pinta la matriz en LaTeX
+A @ B        # producto matricial
+A * B        # producto elemento a elemento (el .* de MATLAB)
+eye_sym(n)   # identidad exacta, para arrancar la L de una factorización
+sqrt(x)      # raíz exacta si x es simbólico (Cholesky), NumPy si es decimal
+mostrar(A)   # pinta la matriz en LaTeX
 ```
 
 Para los métodos directos conviene `M.sym`: no hay error de redondeo y las

@@ -313,6 +313,15 @@ def tan(x):
     return sym.tan(x) if _es_simbolico(x) else np.tan(x)
 
 
+def sqrt(x):
+    """Raíz cuadrada: exacta si la entrada es simbólica, NumPy si es numérica.
+
+    Hace falta para Cholesky: ``np.sqrt`` no sabe sacar la raíz de un entero de
+    SymPy, y ``sym.sqrt`` sí (deja ``sqrt(2)`` sin convertir a decimal).
+    """
+    return sym.sqrt(x) if _es_simbolico(x) else np.sqrt(x)
+
+
 pi = np.pi
 rad = np.radians
 deg = np.degrees

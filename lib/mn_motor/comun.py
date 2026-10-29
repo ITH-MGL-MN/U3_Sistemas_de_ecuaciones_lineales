@@ -137,6 +137,36 @@ def matriz_igual(respuesta, esperado, tol=1e-6):
     return True
 
 
+def _es_lista_de_matrices(x):
+    """¿Es una tupla/lista de matrices (y no una sola matriz)?
+
+    Una matriz es ``[[...], [...]]``: dos niveles. Una lista de matrices tiene
+    tres, porque el primer elemento ya es ``[[...], ...]``.
+    """
+    if not isinstance(x, (list, tuple)) or not x:
+        return False
+    primero = x[0]
+    return (isinstance(primero, (list, tuple)) and bool(primero)
+            and isinstance(primero[0], (list, tuple)))
+
+
+def comparar(respuesta, esperado):
+    """Compara la respuesta con lo esperado, admitiendo VARIAS matrices.
+
+    Los métodos que devuelven dos resultados (por ejemplo LU entrega ``L`` y
+    ``U``) se comparan pieza por pieza. Todo lo demás pasa por ``matriz_igual``.
+    """
+    if _es_lista_de_matrices(esperado):
+        try:
+            partes = list(respuesta)
+        except TypeError:
+            return False
+        if len(partes) != len(esperado):
+            return False
+        return all(matriz_igual(p, e) for p, e in zip(partes, esperado))
+    return matriz_igual(respuesta, esperado)
+
+
 def numero_igual(respuesta, esperado, tol=1e-6):
     try:
         return abs(float(respuesta) - float(esperado)) < tol

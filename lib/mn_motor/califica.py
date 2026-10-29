@@ -49,7 +49,7 @@ def _acierto_funcion(q, marco):
             res = fn(*entrada)
         except Exception:
             return 0
-        if res is None or not comun.matriz_igual(res, esperado):
+        if res is None or not comun.comparar(res, esperado):
             return 0
     return 1
 
@@ -111,5 +111,5 @@ def _detalle_funcion(i, q, marco):
         except Exception as exc:
             print(f'      caso {k}: ⛔ lanzó {type(exc).__name__}: {exc}')
             continue
-        ok = res is not None and comun.matriz_igual(res, esperado)
+        ok = res is not None and comun.comparar(res, esperado)
         print(f'      caso {k}: {"✅" if ok else "❌"}')
