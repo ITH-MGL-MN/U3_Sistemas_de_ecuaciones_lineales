@@ -79,22 +79,7 @@ ecuaciones**. Eso permite separar los datos (los números) de las incógnitas
 3. Los términos independientes se ponen en otra columna: el **vector de términos
    independientes** $\mathbf{b}$.
 
-$$
-\underbrace{\begin{bmatrix}
-a_{11} & a_{12} & \cdots & a_{1n} \\
-a_{21} & a_{22} & \cdots & a_{2n} \\
-\vdots & \vdots & \ddots & \vdots \\
-a_{n1} & a_{n2} & \cdots & a_{nn}
-\end{bmatrix}}_{\mathbf{A}\;(n\times n)}
-\;
-\underbrace{\begin{bmatrix}
-x_1 \\ x_2 \\ \vdots \\ x_n
-\end{bmatrix}}_{\mathbf{x}\;(n\times 1)}
-=
-\underbrace{\begin{bmatrix}
-b_1 \\ b_2 \\ \vdots \\ b_n
-\end{bmatrix}}_{\mathbf{b}\;(n\times 1)}
-$$
+$$\underbrace{\begin{bmatrix} a_{11} & a_{12} & \cdots & a_{1n} \\ a_{21} & a_{22} & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ a_{n1} & a_{n2} & \cdots & a_{nn} \end{bmatrix}}_{\mathbf{A}\;(n\times n)} \; \underbrace{\begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{bmatrix}}_{\mathbf{x}\;(n\times 1)} = \underbrace{\begin{bmatrix} b_1 \\ b_2 \\ \vdots \\ b_n \end{bmatrix}}_{\mathbf{b}\;(n\times 1)}$$
 
 es decir,
 
@@ -108,13 +93,11 @@ ecuación**. Con un caso $2\times 2$ se ve sin lugar a dudas:
 $$
 \begin{bmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{bmatrix}
 \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}
-=
-\begin{bmatrix}
+= \begin{bmatrix}
 a_{11}x_1 + a_{12}x_2 \\
 a_{21}x_1 + a_{22}x_2
 \end{bmatrix}
-=
-\begin{bmatrix} b_1 \\ b_2 \end{bmatrix}.
+= \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}.
 $$
 
 El primer renglón del resultado es exactamente la primera ecuación de la forma
@@ -168,7 +151,11 @@ $2\times2$ sencillo:
 $$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 4 \\ 7 \end{bmatrix}.$$
 
 1. Se traducen los renglones a ecuaciones: $2x_1 + x_2 = 4$ y $x_1 + 3x_2 = 7$.
-2. Se arma la matriz aumentada: $\begin{bmatrix} 2 & 1 & \mid & 4 \\ 1 & 3 & \mid & 7 \end{bmatrix}$.
+2. Se arma la matriz aumentada, separando los coeficientes de los términos
+   independientes con una raya vertical:
+
+$$\begin{bmatrix} 2 & 1 & \mid & 4 \\ 1 & 3 & \mid & 7 \end{bmatrix}$$
+
 3. Se revisa el pivote de la columna 1: $a_{11} = 2 \neq 0$, por lo que se puede eliminar hacia adelante sin intercambiar renglones.
 
 ---
@@ -193,8 +180,8 @@ $$
 si se multiplica la ecuación 1 por $\frac{a_{21}}{a_{11}}$ y se le resta a la
 ecuación 2, la incógnita $x_1$ desaparece de la segunda:
 
-$$\left(a_{21} - \frac{a_{21}}{a_{11}}a_{11}\right)x_1
-+ \left(a_{22} - \frac{a_{21}}{a_{11}}a_{12}\right)x_2
+$$\left(a_{21} - \frac{a_{21}}{a_{11}}a_{11}\right)x_1 +
+\left(a_{22} - \frac{a_{21}}{a_{11}}a_{12}\right)x_2
 = b_2 - \frac{a_{21}}{a_{11}}b_1,$$
 
 es decir
@@ -294,8 +281,10 @@ $$[\mathbf{A}\mid\mathbf{b}] = \begin{bmatrix}
    - Renglón 2: $m_{21} = \dfrac{-3}{2}$. Como $R_2 - m_{21}R_1 = R_2 + \tfrac{3}{2}R_1$,
      se calcula primero $\tfrac{3}{2}R_1 = \left(3,\ \tfrac{3}{2},\ -\tfrac{3}{2} \mid 12\right)$
      y luego
+
      $$R_2 + \tfrac{3}{2}R_1 = \left(0,\ \tfrac{1}{2},\ \tfrac{1}{2} \mid 1\right).$$
    - Renglón 3: $m_{31} = \dfrac{-2}{2} = -1$. Como $R_3 - m_{31}R_1 = R_3 + R_1$,
+
      $$R_3 + R_1 = \left(0,\ 2,\ 1 \mid 5\right).$$
 
    La matriz queda
@@ -541,15 +530,18 @@ $$\mathbf{U} = \begin{bmatrix} 2 & 1 & -1 \\ 0 & \tfrac{1}{2} & \tfrac{1}{2} \\ 
 \qquad \mathbf{d} = \begin{bmatrix} 8 \\ 1 \\ 1 \end{bmatrix}.$$
 
 1. **Renglón 3.** Tiene una sola incógnita: $-1\,x_3 = 1$, entonces
+
    $$x_3 = \frac{d_3}{u_{33}} = \frac{1}{-1} = -1.$$
 
 2. **Renglón 2.** Ya se conoce $x_3$, así que
+
    $$\tfrac{1}{2}x_2 + \tfrac{1}{2}x_3 = 1
    \qquad\Longrightarrow\qquad
    x_2 = \frac{d_2 - u_{23}x_3}{u_{22}} = \frac{1 - \tfrac{1}{2}(-1)}{\tfrac{1}{2}}
    = \frac{1 + \tfrac{1}{2}}{\tfrac{1}{2}} = \frac{\tfrac{3}{2}}{\tfrac{1}{2}} = 3.$$
 
 3. **Renglón 1.** Ya se conocen $x_2$ y $x_3$:
+
    $$2x_1 + x_2 - x_3 = 8
    \qquad\Longrightarrow\qquad
    x_1 = \frac{d_1 - u_{12}x_2 - u_{13}x_3}{u_{11}}
