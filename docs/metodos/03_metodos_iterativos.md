@@ -11,6 +11,7 @@
 3. [3.3 Condición de Dominancia Diagonal Estricta](#sec-3-3)
 4. [3.4 Mejoramiento de Convergencia con Relajación (SOR)](#sec-3-4)
 5. [3.5 Criterio de Paro por Error Relativo](#sec-3-5)
+6. [3.6 Por Qué Converge: Radio Espectral](#sec-3-6)
 
 ### <a id="sec-3-1"></a>3.1 Fundamento de los Métodos Iterativos
 
@@ -148,7 +149,11 @@ $$\mathbf{x}^{(1)} = \left[\frac{9}{10},\ \frac{516}{175},\ \frac{13631}{3500}\r
 
 $$\varepsilon_{a,i} = \left| \frac{x_i^{(k+1)} - x_i^{(k)}}{x_i^{(k+1)}} \right| \times 100\% < \varepsilon_s, \qquad \forall i = 1,\dots,n.$$
 
-La norma práctica es el **máximo** de los $\varepsilon_{a,i}$: se detiene cuando la componente que más cambió ya cambió poco. Se usa error relativo y no absoluto para que el criterio no dependa de la escala de las incógnitas.
+Se usa error relativo y no absoluto para que el criterio no dependa de la escala de las incógnitas.
+
+Ese máximo de los $\varepsilon_{a,i}$ es, con el vocabulario de la [sección 2.5](02_descomposicion_lu.md#sec-2-5), la **norma $\infty$** del vector de errores relativos: la componente que más cambió es la que manda. El criterio se detiene cuando
+
+$$\left\| \boldsymbol{\varepsilon}_a \right\|_\infty < \varepsilon_s.$$
 
 La división entre $x_i^{(k+1)}$ trae un detalle: si una componente vale cero, el error relativo no está definido y hay que tratarla aparte, por ejemplo esperando a que la componente sea distinta de cero o revisando el cambio absoluto.
 
@@ -168,6 +173,72 @@ Si una sola de las dos falla, la iteración continúa. El error reportado en la 
 4. La tendencia —de $0.1647$ a $0.0299$— muestra convergencia: el criterio de paro aún no se satisface en la iteración 3.
 
 ---
+
+### <a id="sec-3-6"></a>3.6 Por Qué Converge: Radio Espectral
+
+**📘 Teoría.** Todo método iterativo se puede escribir en forma matricial como
+
+$$\mathbf{x}^{(k+1)} = \mathbf{T}\,\mathbf{x}^{(k)} + \mathbf{c}.$$
+
+Si $\mathbf{x}^{*}$ es la solución exacta, también $\mathbf{x}^{*} = \mathbf{T}\mathbf{x}^{*} + \mathbf{c}$. Restando las dos igualdades queda una ecuación que solo involucra al **error** $\mathbf{e}^{(k)} = \mathbf{x}^{(k)} - \mathbf{x}^{*}$:
+
+$$\mathbf{e}^{(k+1)} = \mathbf{T}\,\mathbf{e}^{(k)} \qquad \Longrightarrow \qquad \mathbf{e}^{(k)} = \mathbf{T}^{k}\,\mathbf{e}^{(0)}.$$
+
+O sea: el error inicial no se corrige, se va **multiplicando por $\mathbf{T}$**. El método converge si y solo si $\mathbf{T}^{k}$ tiende a la matriz de ceros, y eso lo decide el autovalor más grande en módulo, que se llama **radio espectral**:
+
+$$\rho(\mathbf{T}) = \max_{i} |\lambda_i(\mathbf{T})|.$$
+
+> 📐 **Teorema.** El método converge para **cualquier** $\mathbf{x}^{(0)}$ si y solo si $\rho(\mathbf{T}) < 1$. Además $\rho$ mide la velocidad: en cada iteración el error se multiplica por $\rho$, así que para ganar $d$ dígitos hacen falta unas $\ln(10^{d})/\ln(1/\rho)$ iteraciones.
+
+Los autovalores pueden ser **complejos**. En ese caso $|\lambda_i|$ es el módulo, $\sqrt{(\text{parte real})^2 + (\text{parte imaginaria})^2}$; nunca el valor de la parte real sola.
+
+Las dos matrices de iteración salen de partir $\mathbf{A} = \mathbf{D} + \mathbf{E} + \mathbf{F}$, con $\mathbf{D}$ la diagonal, $\mathbf{E}$ la parte estrictamente inferior y $\mathbf{F}$ la estrictamente superior:
+
+$$\mathbf{T}_{\text{Jacobi}} = -\mathbf{D}^{-1}(\mathbf{E} + \mathbf{F}), \qquad \mathbf{T}_{\text{GS}} = -(\mathbf{D} + \mathbf{E})^{-1}\mathbf{F}.$$
+
+> 🔤 **Aviso de notación.** Las letras $\mathbf{L}$ y $\mathbf{U}$ ya están ocupadas por la factorización LU del [documento 02](02_descomposicion_lu.md), y no tienen nada que ver con estas $\mathbf{E}$ y $\mathbf{F}$.
+
+**Cómo se conecta con la dominancia diagonal.** La dominancia **implica** $\rho(\mathbf{T}) < 1$, o sea que garantiza la convergencia. Pero el recíproco es **falso**: hay matrices sin dominancia que convergen perfectamente. "No dominante" no significa "no converge"; significa "la dominancia no me respalda, hay que calcular el radio espectral".
+
+**🧮 Ejemplo algebraico.** La matriz
+
+$$\mathbf{B} = \begin{bmatrix} 2 & 3 \\ 1 & 2 \end{bmatrix}, \qquad \det(\mathbf{B}) = 1,$$
+
+**no** es dominante: en el primer renglón $|2| < |3|$. Sin embargo,
+
+$$\mathbf{T}_{\text{Jacobi}} = \begin{bmatrix} 0 & -3/2 \\ -1/2 & 0 \end{bmatrix} \Rightarrow \lambda = \pm\frac{\sqrt{3}}{2} \Rightarrow \rho = \frac{\sqrt{3}}{2} \approx 0.866,$$
+
+$$\mathbf{T}_{\text{GS}} = \begin{bmatrix} 0 & -3/2 \\ 0 & 3/4 \end{bmatrix} \Rightarrow \lambda = \frac{3}{4},\, 0 \Rightarrow \rho = \frac{3}{4} = 0.75.$$
+
+Los dos radios son menores que $1$, así que **los dos métodos convergen**. Y como $0.75 < 0.866$, Gauss-Seidel avanza más por iteración, que es lo que se observa.
+
+**🔢 Versión con enteros (paso a paso).** Con $\mathbf{b} = \mathbf{B}[1,\,1]^{T} = [5,\ 3]^{T}$ y arranque $\mathbf{x}^{(0)} = [0,\ 0]$, Gauss-Seidel hace:
+
+| $k$ | $x_1^{(k)}$ | $x_2^{(k)}$ | distancia a $[1,1]$ |
+|---|---|---|---|
+| 1 | $5/2 = 2.5$ | $1/4 = 0.25$ | $1.5$ |
+| 2 | $17/8 = 2.125$ | $7/16 = 0.4375$ | $1.125$ |
+| 3 | $59/32 = 1.844$ | $37/64 = 0.578$ | $0.844$ |
+| 4 | $209/128 = 1.633$ | $175/256 = 0.684$ | $0.633$ |
+| 5 | $755/512 = 1.475$ | $781/1024 = 0.763$ | $0.475$ |
+
+La columna de la distancia se multiplica por $0.75$ en cada renglón ($1.5 \to 1.125 \to 0.844 \to 0.633 \to 0.475$): exactamente $\rho_{\text{GS}}$. La convergencia **no es rápida** (con $\rho = 0.75$ hacen falta ~$24$ iteraciones para ganar tres dígitos), pero es convergencia.
+
+**📊 Comparación de velocidades** (valores verificados):
+
+| Matriz | $\rho_{\text{Jacobi}}$ | $\rho_{\text{GS}}$ |
+|---|---|---|
+| $\begin{bmatrix} 2 & 3 \\ 1 & 2 \end{bmatrix}$ (no dominante) | $0.866$ | $0.750$ |
+| $\begin{bmatrix} 4 & 1 & -1 \\ 2 & 7 & 1 \\ 1 & -3 & 12 \end{bmatrix}$ (dominante) | $0.293$ | $0.0546$ |
+
+En la matriz dominante el error se reduce a la tercera parte en cada iteración con Jacobi y **unas $18$ veces** con Gauss-Seidel. Ahí está el valor práctico de la dominancia: no solo asegura que converge, sino que converge rápido.
+
+> 📎 **Nota fina.** En matrices **tridiagonales** se puede demostrar que $\rho_{\text{GS}} = \rho_{\text{Jacobi}}^{2}$, y por eso Gauss-Seidel gana al doble por paso. Aquí se ve en la primera fila: $0.866^2 = 0.75$. En la segunda **no** se cumple ($0.293^2 = 0.086$, contra $0.0546$ medido), porque esa matriz no es tridiagonal. Cuando una fórmula trae hipótesis, hay que revisarlas.
+
+**El precio de saberlo.** Calcular $\rho$ exige autovalores, y calcular autovalores cuesta más que resolver el sistema. Por eso en la práctica no se calcula: se usan criterios **baratos** que garantizan la convergencia sin contar nada — dominancia diagonal estricta, o que la matriz sea simétrica y definida positiva. El radio espectral es el **porqué** de esos criterios, no la herramienta del día a día.
+
+---
+
 
 | ⬅️ Anterior | 🏠 Inicio | Siguiente ➡️ |
 |:---|:---:|---:|

@@ -20,7 +20,9 @@ preguntas/
 ```
 
 Cada cuaderno tiene 11 preguntas: 5 de opción múltiple, 3 con dato calculado y 3
-de **programar**.
+de **programar**. La excepción es el cuaderno 03, que tiene **12**: la última
+pide el número de condición, porque ese cuaderno también cubre la confiabilidad
+del resultado (`docs/metodos/02_descomposicion_lu.md`, sección 2.5).
 
 ## Cómo se llega a una pregunta
 
