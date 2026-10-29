@@ -177,6 +177,17 @@ def _matriz_aumentada(rng):
         return A, b, aumentada
 
 
+def _signo_y_factor(m):
+    """Descompone ``R2 <- R2 - m*R1`` en ``R2 <- R2 + signo*factor*R1``.
+
+    Es la ÚNICA fuente de verdad de la operación: la usan tanto el cálculo de
+    la matriz esperada como el texto que se muestra. Antes cada uno tenía su
+    propia convención de signo y, con m = ±1, la pantalla pedía una cosa y la
+    clave esperaba otra.
+    """
+    return (-1, abs(m)) if m > 0 else (1, abs(m))
+
+
 def _operacion_renglon(rng):
     """Genera una matriz 3x3 y la operación R2 <- R2 - m*R1 con m entero."""
     while True:
@@ -184,8 +195,9 @@ def _operacion_renglon(rng):
         if A[0][0] == 0:
             continue
         m = rng.choice([-3, -2, -1, 1, 2, 3])
+        signo, factor = _signo_y_factor(m)
         resultado = [fila[:] for fila in A]
-        resultado[1] = [A[1][j] - m * A[0][j] for j in range(3)]
+        resultado[1] = [A[1][j] + signo * factor * A[0][j] for j in range(3)]
         return A, m, resultado
 
 
@@ -218,14 +230,46 @@ def _tex(M):
 
 
 def _op_renglon_tex(m):
-    """Texto LaTeX de R2 <- R2 ± m·R1, sin dobles signos ni '1R1'."""
-    if m == 1:
-        return r'R_2 \leftarrow R_2 + R_1'
-    if m == -1:
-        return r'R_2 \leftarrow R_2 - R_1'
-    if m > 0:
-        return rf'R_2 \leftarrow R_2 - {m}R_1'
-    return rf'R_2 \leftarrow R_2 + {-m}R_1'
+    """Texto LaTeX de ``R2 <- R2 + signo*factor*R1``, sin dobles signos.
+
+    Deriva el signo del mismo ``_signo_y_factor`` que calcula la matriz
+    esperada, así que lo que se lee y lo que se califica no pueden diferir.
+    """
+    signo, factor = _signo_y_factor(m)
+    op = '-' if signo < 0 else '+'
+    if factor == 1:
+        return rf'R_2 \leftarrow R_2 {op} R_1'
+    return rf'R_2 \leftarrow R_2 {op} {factor}R_1'
+
+
+def _revisar_coherencia(datos):
+    """Comprueba que lo que se MUESTRA reproduce lo que se ESPERA.
+
+    Recorre los seis valores posibles de ``m``, toma el texto tal como lo lee
+    el alumno, le extrae el signo y el factor, y aplica la operación a la
+    matriz. El resultado tiene que dar lo mismo que la clave. Si el texto y el
+    cálculo vuelven a divergir, salta aquí en vez de costarle puntos a un
+    grupo entero.
+    """
+    base = datos['A2']
+    for m in (-3, -2, -1, 1, 2, 3):
+        tex = _op_renglon_tex(m)
+        # se relee el texto, no el generador: eso es lo que ve el alumno
+        cuerpo = tex.split('leftarrow')[-1]
+        leido_txt = re.search(r'R_2\s*([+-])\s*(\d*)R_1', cuerpo)
+        if leido_txt is None:
+            raise AssertionError(f'El texto de la operación no tiene la forma esperada: {tex}')
+        signo = -1 if leido_txt.group(1) == '-' else 1
+        factor = int(leido_txt.group(2)) if leido_txt.group(2) else 1
+
+        leido = [base[1][j] + signo * factor * base[0][j] for j in range(3)]
+        s, f = _signo_y_factor(m)
+        esperado = [base[1][j] + s * f * base[0][j] for j in range(3)]
+        if leido != esperado:
+            raise AssertionError(
+                f'La operación mostrada ({tex}) no reproduce la respuesta '
+                f'esperada para m={m}: {leido} vs {esperado}')
+    return True
 
 
 def generar_tarea(alumno_id, nombre=''):
@@ -240,6 +284,7 @@ def generar_tarea(alumno_id, nombre=''):
     banco = _leer_banco()
     datos = _datos_alumno(alumno_id)
     nc = extraer_nc(alumno_id)
+    _revisar_coherencia(datos)
 
     preguntas = []
 
