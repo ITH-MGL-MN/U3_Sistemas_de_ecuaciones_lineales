@@ -25,6 +25,7 @@ from mn_motor.ajustes import CUADERNO, MAX_INTENTOS, TAREA_ID
 from mn_motor.califica import calificar
 from mn_motor.comun import extraer_nc, semilla_de
 from mn_motor.envio import consultar_calificacion, enviar, ultimo_envio
+from mn_motor.practica import practica
 from mn_motor.tarea import generar_tarea, preguntas_del_cuaderno, ver_preguntas
 from mn_motor.ui import pregunta
 
@@ -35,6 +36,7 @@ __all__ = [
     'enviar',
     'extraer_nc',
     'generar_tarea',
+    'practica',
     'pregunta',
     'semilla_de',
     'ultimo_envio',

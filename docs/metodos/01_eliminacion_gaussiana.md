@@ -429,7 +429,12 @@ sistema no tiene solución única).
 Cada intercambio de renglones cambia el signo del determinante, pero no su valor
 absoluto. Por eso, contando los intercambios $p_{\text{swaps}}$:
 
-$$\det(\mathbf{A}) = (-1)^{p_{\text{swaps}}} \prod_{k=1}^{n} u_{kk}.$$
+$$\det(\mathbf{A}) = (-1)^{p_{\text{swaps}}}\, u_{11}\,u_{22}\cdots u_{nn}.$$
+
+La productoria $\prod_{k=1}^{n} u_{kk}$ es al producto lo que la sumatoria
+$\sum_{k=1}^{n} u_{kk}$ es a la suma: multiplicar en vez de sumar. Escrito a mano
+es simplemente **el producto de la diagonal** de la matriz triangular,
+$u_{11}u_{22}\cdots u_{nn}$.
 
 **🧮 Ejemplo algebraico.** Para una matriz $2\times2$ el criterio compara solo dos
 candidatos. Si $|a_{21}| > |a_{11}|$ se elige $p = 2$ y se intercambian los

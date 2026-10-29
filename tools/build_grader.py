@@ -25,6 +25,7 @@ import base64
 import os
 import sys
 import zlib
+from typing import Any
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)
@@ -153,9 +154,39 @@ def _leer_recursos(carpeta, relativa):
     return recursos
 
 
+def _firma_q(q):
+    """Lo que debe cambiar entre dos alumnos (para detectar tareas clonadas)."""
+    if q['tipo'] == 'funcion':
+        return (q['funcion'], repr(q['casos']))
+    return q['esperado']
+
+
+def _marco_perfecto(preguntas):
+    """Un 'alumno perfecto': entrega las funciones de REFERENCIA del motor.
+
+    Cada pregunta de programar declara ``referencia`` (el nombre de la función
+    en ``solvers_u3``). Así se comprueba de punta a punta que los casos ocultos
+    son resolubles y que la comparación acepta la solución correcta.
+    """
+    ref = sys.modules.get('mn_motor.solvers_u3')
+    marco = {}
+    for q in preguntas:
+        if q['tipo'] != 'funcion':
+            continue
+        if ref is None:
+            raise AssertionError('el blob no trae mn_motor.solvers_u3')
+        nombre = q.get('referencia')
+        if not nombre or not hasattr(ref, nombre):
+            raise AssertionError(
+                f"la pregunta {q['id']!r} no declara una referencia válida "
+                f'(referencia={nombre!r})')
+        marco[q['funcion']] = getattr(ref, nombre)
+    return marco
+
+
 def _verificar(codigo, cuaderno, tarea_id):
     """Carga el blob en un namespace limpio y comprueba que funciona."""
-    ns = {'__name__': 'blob_prueba', '__file__': '<blob>'}
+    ns: dict[str, Any] = {'__name__': 'blob_prueba', '__file__': '<blob>'}
     exec(compile(codigo, '<blob>', 'exec'), ns)
 
     for nombre in ns['__all__']:
@@ -173,12 +204,13 @@ def _verificar(codigo, cuaderno, tarea_id):
 
     # Dos alumnos distintos tienen que recibir datos distintos.
     otra = ns['generar_tarea']('m99999999@hermosillo.tecnm.mx', 'Otro')
-    if [q['esperado'] for q in tarea['preguntas']] == \
-       [q['esperado'] for q in otra['preguntas']]:
+    if [_firma_q(q) for q in tarea['preguntas']] == \
+       [_firma_q(q) for q in otra['preguntas']]:
         raise AssertionError('dos alumnos recibieron exactamente la misma tarea')
 
-    tarea['respuestas'] = [q['esperado'] for q in tarea['preguntas']]
-    puntos, maximo = ns['calificar'](tarea)
+    tarea['respuestas'] = [q.get('esperado') for q in tarea['preguntas']]
+    puntos, maximo = ns['calificar'](tarea, marco=_marco_perfecto(
+        tarea['preguntas']))
     if puntos != maximo:
         raise AssertionError(f'contestar todo bien dio {puntos}/{maximo}')
 

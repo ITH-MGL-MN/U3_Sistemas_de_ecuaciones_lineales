@@ -9,13 +9,24 @@
     6   p06_triangular.py                   matriz   triangularizar un sistema
     7   p07_multiplicador.py                numero   calcular m21
     8   p08_determinante.py                 numero   determinante por pivotes
+    9   p09_programa_eliminar.py            funcion  programar la eliminación
+    10  p10_programa_sustitucion.py         funcion  programar la sustitución
+    11  p11_programa_solve.py               funcion  programar el método completo
 
 Las de opción múltiple son SOLO su .md (la correcta se marca con ``- [x]``).
 Las demás son un .py con ``construir(semilla)``.
+
+Las de tipo ``funcion`` (9-11) no piden teclear nada: el alumno escribe la
+función en el cuaderno y aquí se le busca por nombre (``FUNCION``) para probarla
+con casos ocultos de tamaños 2, 3 y 4. ``REFERENCIA`` dice qué función de
+``mn_motor.solvers_u3`` resuelve el caso: la usa ``tools/build_grader.py`` para
+comprobar el blob de punta a punta.
 """
 from mn_motor.mcq import desde_markdown
 
-from . import p06_triangular, p07_multiplicador, p08_determinante
+from . import (p06_triangular, p07_multiplicador, p08_determinante,
+               p09_programa_eliminar, p10_programa_sustitucion,
+               p11_programa_solve)
 
 CARPETA = 'preguntas/u3_02_gaussiana'
 
@@ -28,4 +39,7 @@ PREGUNTAS = [
     p06_triangular,
     p07_multiplicador,
     p08_determinante,
+    p09_programa_eliminar,
+    p10_programa_sustitucion,
+    p11_programa_solve,
 ]

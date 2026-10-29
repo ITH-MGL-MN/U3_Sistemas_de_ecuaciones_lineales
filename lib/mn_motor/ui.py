@@ -21,6 +21,19 @@ def pregunta(n, tarea_=None):
     q = t['preguntas'][n - 1]
     encabezado = f"### Pregunta {n} — {q['titulo']}\n\n{q['enunciado']}"
 
+    if q['tipo'] == 'funcion':
+        # Aquí no hay nada que teclear: la respuesta es la función que el
+        # alumno definió unas celdas más arriba.
+        display(Markdown(encabezado))
+        display(Markdown(
+            f"> 💻 **Esta respuesta no se teclea:** es la función "
+            f"`{q['funcion']}` que definiste arriba.\n>\n"
+            f"> Firma: `{q.get('firma', '')}`\n>\n"
+            f"> Compruébala antes de enviar con `practica('{q['id']}')`."))
+        if q.get('ayuda'):
+            display(Markdown(f"> 💡 {q['ayuda']}"))
+        return
+
     if q['tipo'] == 'mcq':
         letras = comun.letras(len(q['opciones']))
         cuerpo = '\n'.join(f'- **{l})** {o}' for l, o in zip(letras, q['opciones']))

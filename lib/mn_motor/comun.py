@@ -83,9 +83,21 @@ def letras(n):
 # ---------------------------------------------------------------------
 
 def a_lista(texto):
-    """Texto del alumno -> lista de listas. Seguro: no usa ``eval``."""
+    """Texto del alumno -> lista de listas. Seguro: no usa ``eval``.
+
+    Acepta también matrices (ndarray, sympy Matrix o MatrizRobomat), que es lo
+    que devuelven las funciones que programan los alumnos: ``str(Matrix(...))``
+    no es evaluable por ``literal_eval``, así que hay que convertirlas antes.
+    """
     if texto is None:
         return None
+    if hasattr(texto, 'tolist') and not isinstance(texto, (list, tuple)):
+        v = texto.tolist()
+        if isinstance(v, (int, float)):
+            return [[v]]
+        if v and isinstance(v[0], (list, tuple)):
+            return [list(f) for f in v]
+        return [list(v)]
     if isinstance(texto, (list, tuple)):
         return [list(f) if isinstance(f, (list, tuple)) else [f] for f in texto]
     s = str(texto).strip()
@@ -116,7 +128,9 @@ def matriz_igual(respuesta, esperado, tol=1e-6):
     for i, fila in enumerate(r):
         for j, v in enumerate(fila):
             try:
-                if abs(float(v) - float(esperado[i][j])) > tol:
+                # Se compara al revés a propósito: con `>` un NaN pasaría,
+                # porque `nan > tol` es False y el bucle seguiría.
+                if not abs(float(v) - float(esperado[i][j])) <= tol:
                     return False
             except (TypeError, ValueError):
                 return False
