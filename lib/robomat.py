@@ -24,7 +24,13 @@ matricial; la clase MatrizRobomat lo cambia para que no haya ambigüedad).
 
 Constructores: ``zeros(3)`` da una matriz 3x3 (convención de MATLAB), no un vector;
 para un vector usa ``zeros(3, 1)`` o ``zeros(1, 3)``. Las versiones simbólicas son
-``zeros.sym``, ``ones.sym`` y ``eye.sym``.
+``zeros.sym``, ``ones.sym``, ``eye.sym`` e ``I.sym``.
+
+Exacto vs numérico: ``M[[...]]`` da numérico (float64, como MATLAB por omisión) y
+``M.sym[[...]]`` da exacto (enteros y fracciones, tipo MatrizRobomat). Para los
+métodos directos —Gauss, LU, Thomas, Cholesky— conviene ``M.sym``: no hay error
+de redondeo y ``mostrar()`` enseña las fracciones tal cual. ``es_exacto(x)`` dice
+si un resultado quedó sin ningún flotante.
 
 Forma de ``M[[...]]`` (regla de MATLAB): ``M[[1, 2, 3]]`` es un RENGLÓN (1x3);
 ``M[[1], [2], [3]]`` es una COLUMNA (3x1); ``M[[1, 2], [3, 4]]`` es una matriz
@@ -307,6 +313,15 @@ def tan(x):
     return sym.tan(x) if _es_simbolico(x) else np.tan(x)
 
 
+def sqrt(x):
+    """Raíz cuadrada: exacta si la entrada es simbólica, NumPy si es numérica.
+
+    Hace falta para Cholesky: ``np.sqrt`` no sabe sacar la raíz de un entero de
+    SymPy, y ``sym.sqrt`` sí (deja ``sqrt(2)`` sin convertir a decimal).
+    """
+    return sym.sqrt(x) if _es_simbolico(x) else np.sqrt(x)
+
+
 pi = np.pi
 rad = np.radians
 deg = np.degrees
@@ -349,6 +364,17 @@ class _CreadorMatriz:
         if _builtins.any(_es_simbolico(x) for x in plano):
             return MatrizRobomat(filas)
         return np.array(filas, dtype=float)
+
+    @property
+    def sym(self):
+        """Versión exacta: ``M.sym[[1, 2], [3, 4]]`` -> MatrizRobomat.
+
+        Igual que ``M[[...]]`` pero los números entran como enteros o
+        fracciones en vez de float64. Es el camino para los métodos directos:
+        sin error de redondeo, y con ``mostrar()`` se leen las fracciones tal
+        cual.
+        """
+        return _creador_simbolico
 
 
 class _CreadorIdentidad:
@@ -446,6 +472,21 @@ def var(*args):
 
 
 variables_articulares = var  # alias legible
+
+
+class _CreadorMatrizSimbolica:
+    """``M.sym[[...]]``: lo mismo que ``M[[...]]`` pero exacto.
+
+    Reutiliza TODA la lógica de formas y concatenación de ``M[[...]]`` (renglón
+    vs columna, ``M.sym[[A, b]]``, bloques); lo único que cambia es que los
+    números entran como enteros o fracciones en vez de float64.
+    """
+
+    def __getitem__(self, datos):
+        return var(_CreadorMatriz.__getitem__(M, datos))
+
+
+_creador_simbolico = _CreadorMatrizSimbolica()
 
 
 def jacobiano(vector_posicion, variables):
@@ -624,6 +665,37 @@ def _expresiones_equivalentes(a, b, tol=1e-9):
         if abs(va - vb) > tol * max(1.0, abs(va)):
             return False
     return True
+
+
+def es_exacto(x):
+    """¿El resultado se obtuvo sin ningún número flotante?
+
+    Sirve para comprobar que un método directo (Gauss, LU, Thomas, Cholesky) se
+    hizo con aritmética exacta y no con floats. Se mira el objeto TAL COMO
+    LLEGA, sin convertirlo: si primero se convirtiera a simbólico, los floats se
+    volverían fracciones y la comprobación mentiría.
+
+        es_exacto(M.sym[[1, 2], [3, 4]])   -> True
+        es_exacto(M[[1, 2], [3, 4]])       -> False   (M[[...]] da float64)
+        es_exacto(7)                       -> True
+        es_exacto(sym.Rational(1, 2))      -> True
+        es_exacto(0.5)                     -> False
+    """
+    if isinstance(x, (bool, np.bool_)):
+        return True
+    if isinstance(x, (int, np.integer)):
+        return True
+    if isinstance(x, (float, np.floating)):
+        return False
+    if isinstance(x, np.ndarray):
+        return x.dtype.kind in 'iub'
+    if isinstance(x, sym.MatrixBase):
+        return not x.atoms(sym.Float)
+    if isinstance(x, sym.Basic):
+        return not x.atoms(sym.Float)
+    if isinstance(x, (list, tuple)):
+        return _builtins.all(es_exacto(v) for v in x)
+    return False
 
 
 def verificar(respuesta, esperado, tol=1e-6):

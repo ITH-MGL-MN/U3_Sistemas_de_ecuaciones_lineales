@@ -20,7 +20,7 @@ tarea:
 
 evaluacion:
   tolerancia_simple: 1e-6       # respuestas numéricas (relativa)
-  max_intentos: 2               # envíos permitidos (lo impone el Apps Script)
+  max_intentos: 5               # envíos permitidos (lo impone el Apps Script)
   accion: "guardar"             # acción por defecto del webhook
   # ⚠️ REEMPLAZAR por los valores reales al desplegar el Apps Script de U3
   #     (corre setupWebhookToken() y pega aquí el token y la URL /exec).

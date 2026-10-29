@@ -19,10 +19,10 @@ build/
 *.pdf
 
 # Clave de respuestas: NO se sube al repositorio público. El alumno recibe
-# solo el blob, que ya trae el banco incrustado (ver tools/build_grader.py).
-# El original vive en la rama `test`.
-lib/grader_u3.py
-config/preguntas_u3.yaml
+# solo el blob (grader_ofuscado.txt), que ya trae el motor y las preguntas
+# dentro. Los originales viven en la rama `test`.
+lib/mn_motor/
+preguntas/
 
 # Historial local de envíos del motor de calificación
 config/.envios.json

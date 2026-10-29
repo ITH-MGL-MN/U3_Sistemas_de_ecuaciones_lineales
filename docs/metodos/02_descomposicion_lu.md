@@ -40,8 +40,11 @@ $$\mathbf{A} = \begin{bmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{bmat
 
 1. **Sin LU:** si aparecen dos vectores $\mathbf{b}$ distintos, se hacen **dos eliminaciones** completas, cada una de costo $O(n^{3})$.
 2. **Con LU:** se factoriza una vez y se resuelven **dos sustituciones** por cada $\mathbf{b}$, de costo $O(n^{2})$ cada una.
-3. Con $n=3$ la diferencia es pequeña, pero crece rápido: el ahorro aparece cuando hay muchos lados derechos o $n$ grande.
-4. Para cuantificar el ahorro falta el segundo vector $\mathbf{b}$: **falta: segundo vector $\mathbf{b}$**.
+3. Con $n=3$ la diferencia todavía no se nota, pero crece rápido. Tomando como medidas las multiplicaciones de la eliminación,
+4. Si el segundo lado derecho es $\mathbf{b}^{(2)} = [1,\ 2,\ 3]$, al resolverlo con la **misma** $\mathbf{L}$ y $\mathbf{U}$ se obtiene $\mathbf{y}^{(2)} = [1,\ 7/2,\ -10]$ y $\mathbf{x}^{(2)} = [7,\ -3,\ 10]$, sin volver a tocar $\mathbf{A}$.
+5. La cuenta del ahorro: hacer $k$ eliminaciones cuesta $k\,n^{3}/3$ multiplicaciones; factorizar una vez y sustituir $k$ veces cuesta $n^{3}/3 + k\,n^{2}$. Para $k=2$ la factorización empieza a ganar cuando $n > 6$: con $n=10$ son $667$ contra $533$, y con $n=100$, $666\,667$ contra $353\,333$.
+
+En resumen: **LU no ahorra en un sistema pequeño ni en un solo lado derecho**. Ahorra cuando la matriz se reutiliza.
 
 ---
 
@@ -164,34 +167,127 @@ $$\mathbf{A}^{-1} = \begin{bmatrix} 3/5 & -1/5 \\ -1/5 & 2/5 \end{bmatrix}.$$
 
 ### <a id="sec-2-5"></a>2.5 Condicionamiento del Sistema y Normas Matriciales
 
-**📘 Teoría.** El condicionamiento mide cuánto se amplifica en la solución $\mathbf{x}$ un error cometido en los datos ($\mathbf{A}$ o $\mathbf{b}$). Se cuantifica con el número de condición
+**📘 Teoría.**
 
-$$\text{Cond}(\mathbf{A}) = \|\mathbf{A}\| \cdot \|\mathbf{A}^{-1}\|.$$
+Hasta aquí está el método: cómo se calcula $\mathbf{x}$. Falta la otra mitad de
+la pregunta, que en ingeniería pesa igual: **¿cuánto se puede confiar en el
+resultado?** Un sistema puede resolverse sin un solo error de cuenta y aun así
+dar una respuesta inútil, porque el problema mismo amplifica cualquier
+imprecisión de los datos.
 
-Con la **norma renglón-suma** ($\|\cdot\|_\infty$), que suma el valor absoluto de cada renglón y toma el máximo,
+Para hablar del "tamaño" de un error hay que medir vectores. De eso se encarga
+una **norma**: una función que asigna a cada vector un número no negativo y que
+cumple tres propiedades.
 
-$$\|\mathbf{A}\|_\infty = \max_{1 \le i \le n} \sum_{j=1}^{n} |a_{ij}|,$$
+$$\|\mathbf{x}\| \ge 0, \qquad \|\alpha\mathbf{x}\| = |\alpha|\,\|\mathbf{x}\|, \qquad \|\mathbf{x} + \mathbf{y}\| \le \|\mathbf{x}\| + \|\mathbf{y}\|$$
 
-la perturbación del lado derecho se acota por
+La primera dice que solo el vector nulo mide cero; la segunda, que al escalar un
+vector su norma escala igual; la tercera es la desigualdad del triángulo. Lo
+importante: **hay muchas normas válidas**. Cada una mide el tamaño a su manera y
+todas sirven, mientras se use la misma en los dos lados de una comparación.
 
-$$\frac{\|\Delta\mathbf{x}\|}{\|\mathbf{x}\|} \le \text{Cond}(\mathbf{A})\,\frac{\|\Delta\mathbf{b}\|}{\|\mathbf{b}\|}.$$
+Las dos más fáciles de calcular a mano son
 
-Un sistema bien condicionado tiene $\text{Cond}(\mathbf{A}) \approx 1$; si $\text{Cond}(\mathbf{A}) \gg 10^{k}$ se pueden perder hasta $k$ dígitos de precisión.
+$$\|\mathbf{x}\|_1 = \sum_{i} |x_i| \qquad \text{y} \qquad \|\mathbf{x}\|_\infty = \max_{i} |x_i|,$$
 
-**🧮 Ejemplo algebraico.** Para una matriz $2\times 2$ genérica,
+es decir, la suma de los valores absolutos y la componente mayor en valor
+absoluto. También existe la euclidiana $\|\mathbf{x}\|_2 = \sqrt{\sum_i x_i^2}$,
+pero para matrices exige autovalores, así que en este curso se trabaja con la
+$\infty$.
+
+**La norma de una matriz** no se define aparte: se deduce de la del vector, como
+el máximo estiramiento que la matriz puede producir,
+
+$$\|\mathbf{A}\| = \max_{\|\mathbf{x}\| = 1} \|\mathbf{A}\mathbf{x}\|.$$
+
+De esa definición salen dos fórmulas que sí se calculan sin optimizar nada:
+
+$$\|\mathbf{A}\|_1 = \max_{j} \sum_{i} |a_{ij}| \qquad \text{y} \qquad \|\mathbf{A}\|_\infty = \max_{i} \sum_{j} |a_{ij}|.$$
+
+Fíjate en el intercambio, que es la fuente de casi todos los errores: para un
+**vector**, la $\infty$ toma el máximo de las **componentes**; para una
+**matriz**, el máximo de las **sumas por renglón**. Y la norma $1$ de una matriz
+suma por **columnas**, no por renglones.
+
+**¿Por qué la $\infty$ y no otra?** Porque en el sistema
+$\mathbf{A}\mathbf{x} = \mathbf{b}$ cada renglón es una ecuación. La norma
+$\infty$ mide el error de la ecuación **peor**, que es la que arruina el
+resultado. Es la norma natural para la pregunta "¿cuál es el peor error que
+tengo?"
+
+**Número de condición.** Con eso ya se puede medir la fragilidad del sistema:
+
+$$\text{Cond}(\mathbf{A}) = \|\mathbf{A}\| \cdot \|\mathbf{A}^{-1}\| \;\ge\; 1.$$
+
+Su sentido es el de un factor de amplificación. Si $\mathbf{b}$ trae un error
+relativo $\delta$, la solución puede traer hasta
+
+$$\frac{\|\Delta\mathbf{x}\|}{\|\mathbf{x}\|} \;\le\; \text{Cond}(\mathbf{A})\,\frac{\|\Delta\mathbf{b}\|}{\|\mathbf{b}\|}.$$
+
+El mismo factor aplica a los errores en $\mathbf{A}$ y a los de redondeo que
+introduce el propio algoritmo. Y como $\text{Cond}(\mathbf{A}) = \text{Cond}(\mathbf{A}^{-1})$, la cifra describe al sistema completo, no a una de las dos matrices.
+
+**Cuántos dígitos se pierden.** Un `float64` guarda unos $16$ dígitos
+($\varepsilon \approx 2.2\times 10^{-16}$). Cada factor de $10$ en el número de
+condición se come un dígito:
+
+$$\text{dígitos confiables} \approx 16 - \log_{10}\text{Cond}(\mathbf{A}).$$
+
+Con $\text{Cond} \approx 10^{10}$ quedan $6$ dígitos: el programa puede estar
+perfecto y la respuesta ya no servir.
+
+> ⚠️ Este es el **mismo** fenómeno de la
+> [sección 1.3](01_eliminacion_gaussiana.md#sec-1-3), donde un pivote diminuto
+> amplificaba el error. La diferencia es de quién es la culpa: allá el problema
+> estaba en el **algoritmo** y se arreglaba con pivoteo; aquí está en el
+> **problema** y ningún pivoteo lo salva.
+
+**🧮 Ejemplo algebraico.** Para una matriz $2\times 2$ genérica las dos normas son
 
 $$\|\mathbf{A}\|_\infty = \max\left(|a_{11}| + |a_{12}|,\ |a_{21}| + |a_{22}|\right),$$
 
-y con $\mathbf{A}^{-1} = \begin{bmatrix} b_{11} & b_{12} \\ b_{21} & b_{22} \end{bmatrix}$ se calcula igual, renglón por renglón. El número de condición es el producto de las dos normas; como $\text{Cond}(\mathbf{A}) = \text{Cond}(\mathbf{A}^{-1})$, la cifra no depende de cuál de las dos matrices se tome como referencia.
+y con $\mathbf{A}^{-1} = \begin{bmatrix} b_{11} & b_{12} \\ b_{21} & b_{22} \end{bmatrix}$ se calcula igual, renglón por renglón. El número de condición es el producto de las dos.
 
-**🔢 Versión con enteros (paso a paso).** Con
+**🔢 Versión con enteros (paso a paso).** Primero un sistema **bien** condicionado, con
 
 $$\mathbf{A} = \begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}, \qquad \mathbf{A}^{-1} = \begin{bmatrix} 3/5 & -1/5 \\ -1/5 & 2/5 \end{bmatrix}.$$
 
-1. Norma de $\mathbf{A}$: renglón 1 suma $2 + 1 = 3$; renglón 2 suma $1 + 3 = 4$. Por lo tanto $\|\mathbf{A}\|_\infty = 4$.
-2. Norma de $\mathbf{A}^{-1}$: renglón 1 suma $3/5 + 1/5 = 4/5$; renglón 2 suma $1/5 + 2/5 = 3/5$. Por lo tanto $\|\mathbf{A}^{-1}\|_\infty = 4/5$.
+1. Norma de $\mathbf{A}$: el renglón 1 suma $2 + 1 = 3$ y el 2 suma $1 + 3 = 4$. Entonces $\|\mathbf{A}\|_\infty = 4$.
+2. Norma de $\mathbf{A}^{-1}$: el renglón 1 suma $3/5 + 1/5 = 4/5$ y el 2 suma $1/5 + 2/5 = 3/5$. Entonces $\|\mathbf{A}^{-1}\|_\infty = 4/5$.
 3. Número de condición: $\text{Cond}(\mathbf{A}) = 4 \cdot \tfrac{4}{5} = \tfrac{16}{5} = 3.2$.
-4. Interpretación: $3.2$ está cerca de $1$, así que el sistema está **bien condicionado** y un error relativo en $\mathbf{b}$ se amplifica poco más de tres veces.
+4. Interpretación: $3.2$ está cerca de $1$, el sistema está **bien condicionado** y un error relativo en $\mathbf{b}$ se amplifica poco más de tres veces.
+
+Ahora uno **mal** condicionado, con entradas que parecen inofensivas:
+
+$$\mathbf{B} = \begin{bmatrix} 10 & 7 \\ 7 & 5 \end{bmatrix}, \qquad \mathbf{B}^{-1} = \begin{bmatrix} 5 & -7 \\ -7 & 10 \end{bmatrix}, \qquad \det(\mathbf{B}) = 1.$$
+
+1. $\|\mathbf{B}\|_\infty$: renglones $10 + 7 = 17$ y $7 + 5 = 12$. Toma el máximo, $17$.
+2. $\|\mathbf{B}^{-1}\|_\infty$: renglones $5 + 7 = 12$ y $7 + 10 = 17$. También $17$.
+3. $\text{Cond}(\mathbf{B}) = 17 \cdot 17 = 289$. Es $90$ veces peor que el anterior, y la matriz no tiene nada raro: determinante $1$, entradas de un dígito.
+4. Para ver qué significa, se resuelve $\mathbf{B}\mathbf{x} = \mathbf{b}$ con $\mathbf{b} = [17,\ 12]$, cuya solución exacta es $\mathbf{x} = [1,\ 1]$.
+5. Se perturba el lado derecho en una décima: $\mathbf{b}' = [17.1,\ 11.9]$, un cambio de $0.1/17 = 0.59\,\%$. La nueva solución es
+
+$$\mathbf{x}' = \mathbf{B}^{-1}\begin{bmatrix} 17.1 \\ 11.9 \end{bmatrix} = \begin{bmatrix} 2.2 \\ -0.7 \end{bmatrix}.$$
+
+6. El error relativo en $\mathbf{x}$ es $1.7/1 = 170\,\%$. **Un cambio del $0.59\,\%$ en los datos movió la solución un $170\,\%$**: se perdió el signo de la segunda incógnita. El cociente entre las dos cifras es $170/0.59 = 289$, exactamente el número de condición: la cota no era pesimista, era justa.
+
+**📊 Para tener escala** (norma $\infty$, valores verificados):
+
+| Matriz | $\text{Cond}_\infty$ | Lectura |
+|---|---|---|
+| $\begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix}$ | $3.2$ | bien condicionada, no hay de qué preocuparse |
+| $\begin{bmatrix} 10 & 7 \\ 7 & 5 \end{bmatrix}$ | $289$ | se pierden ~$2$ dígitos; ya se nota |
+| Hilbert $3\times3$ | $748$ | matriz de interpolación, famosa por esto |
+| $\begin{bmatrix} 1 & 1 \\ 1 & 1.0001 \end{bmatrix}$ | $4\times 10^{4}$ | se pierden ~$4$ dígitos |
+
+La última es la trampa clásica: dos renglones **casi** iguales. Geométricamente
+son dos rectas casi paralelas, y su punto de corte se mueve muchísimo si se
+mueve una de las dos rectas.
+
+**Cómo se calcula en la práctica.** A mano solo para matrices de $2\times2$ o
+$3\times3$; en Python, `numpy.linalg.cond(A, numpy.inf)`. **Nunca** se calcula
+invirtiendo la matriz a mano en un problema real: para eso existe la
+descomposición LU, y el número de condición se estima sin invertir.
 
 ---
 
