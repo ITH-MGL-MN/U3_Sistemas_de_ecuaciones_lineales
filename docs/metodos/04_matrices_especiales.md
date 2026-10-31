@@ -38,7 +38,7 @@ Fase 3, sustitución hacia atrás ($k = n-1,\dots,1$):
 
 $$x_n = \frac{r_n'}{f_n'}, \qquad x_k = \frac{r_k' - g_k\,x_{k+1}}{f_k'}.$$
 
-Es la misma factorización LU del documento 02, solo que restringida a tres diagonales.
+Es la misma factorización LU del documento 02, solo que restringida a tres diagonales. Por eso su determinante también sale **gratis**: $\det(\mathbf{A}) = f'_1 f'_2 \cdots f'_n$, el producto de los pivotes modificados. Se desarrolla en la [sección 7 del Cuaderno 04](../../notebooks/U3_04_Especiales_Iterativos.ipynb).
 
 **🧮 Ejemplo algebraico.** Para $n = 2$ con letras,
 
@@ -60,6 +60,7 @@ El pivote de la fase 1 es $f_1$, por eso el algoritmo exige $f_1 \neq 0$ (en gen
 4. **Diagonales modificadas:** $f' = [2,\ 3/2,\ 4/3]$ y $r' = [1,\ 1/2,\ 4/3]$.
 5. **Sustitución hacia atrás:** $x_3 = r_3'/f_3' = 1$; $x_2 = (r_2' - g_2x_3)/f_2' = 1$; $x_1 = (r_1 - g_1x_2)/f_1' = 1$.
 6. **Solución:** $\mathbf{x} = [1,\ 1,\ 1]$ en tiempo $O(n)$.
+7. **De regalo, el determinante:** $\det(\mathbf{A}) = f'_1 f'_2 f'_3 = 2 \cdot \tfrac{3}{2} \cdot \tfrac{4}{3} = 4$, sin ninguna cuenta extra.
 
 ---
 
@@ -76,7 +77,7 @@ Las recurrencias, renglón por renglón ($k = 1,\dots,n$), son
 $$l_{kk} = \sqrt{a_{kk} - \sum_{j=1}^{k-1} l_{kj}^{2}}, \qquad
 l_{ki} = \frac{a_{ki} - \sum_{j=1}^{i-1} l_{ij}l_{kj}}{l_{ii}}, \quad i < k.$$
 
-La raíz cuadrada se calcula primero sobre la diagonal y luego se dividen las entradas del renglón. Tres consecuencias prácticas: cuesta $\tfrac{1}{3}n^{3}$ FLOPs (la mitad que LU), solo hay que guardar la mitad inferior y, por ser definida positiva, el radicando $a_{kk} - \sum l_{kj}^{2}$ es estrictamente positivo, así que **no requiere pivoteo**.
+La raíz cuadrada se calcula primero sobre la diagonal y luego se dividen las entradas del renglón. Tres consecuencias prácticas: cuesta $\tfrac{1}{3}n^{3}$ FLOPs (la mitad que LU), solo hay que guardar la mitad inferior y, por ser definida positiva, el radicando $a_{kk} - \sum l_{kj}^{2}$ es estrictamente positivo, así que **no requiere pivoteo**. El determinante también es inmediato: $\det(\mathbf{A}) = \left(l_{11}l_{22}\cdots l_{nn}\right)^{2}$.
 
 **🧮 Ejemplo algebraico.** Para $n = 2$, igualando entradas en $\mathbf{A} = \mathbf{L}\mathbf{L}^{T}$:
 
@@ -104,6 +105,7 @@ $$\mathbf{A} = \begin{bmatrix} 4 & 12 & -16 \\ 12 & 37 & -43 \\ -16 & -43 & 98 \
 $$\mathbf{L} = \begin{bmatrix} 2 & 0 & 0 \\ 6 & 1 & 0 \\ -8 & 5 & 3 \end{bmatrix}.$$
 
 7. **Verificación $\mathbf{L}\mathbf{L}^{T} = \mathbf{A}$:** la entrada $(1,1)$ da $2\cdot 2 = 4$; la $(2,2)$ da $36 + 1 = 37$; la $(3,3)$ da $64 + 25 + 9 = 98$. En las de fuera de la diagonal, $(1,2) = 2\cdot 6 = 12$ y $(2,3) = 6(-8) + 1\cdot 5 = -43$. Coincide con $\mathbf{A}$.
+8. **De regalo, el determinante:** $\det(\mathbf{A}) = (l_{11}l_{22}l_{33})^{2} = (2\cdot 1\cdot 3)^{2} = 36$.
 
 ---
 
