@@ -39,17 +39,73 @@ def funcion_del_alumno(marco, nombre):
     return fn if callable(fn) else None
 
 
+def _llamar(fn, entrada, segundos=None):
+    """Llama a la función del alumno con un LÍMITE DE TIEMPO opcional.
+
+    Un alumno puede escribir `while error > tol:` sobre un sistema que no
+    converge, y eso colgaría la calificación. Se corre en un hilo aparte y, si
+    no termina a tiempo, se abandona y cuenta como fallo.
+
+    OJO: un hilo de Python no se puede matar. Un `while True: pass` se queda
+    girando y compite por el GIL, así que el límite se usa con un valor corto y
+    sólo como red de seguridad (por omisión NO se pone: ver `tiempo_limite`).
+    """
+    if not segundos:
+        return fn(*entrada)
+
+    import threading
+
+    caja = {}
+
+    def _correr():
+        try:
+            caja['res'] = fn(*entrada)
+        except BaseException as exc:      # noqa: BLE001 - se reporta como fallo
+            caja['exc'] = exc
+
+    hilo = threading.Thread(target=_correr, daemon=True)
+    hilo.start()
+    hilo.join(segundos)
+    if hilo.is_alive():
+        raise TimeoutError(f'tu función no terminó en {segundos:g} s '
+                           f'(¿un ciclo que nunca acaba? Revisa max_iter.)')
+    if 'exc' in caja:
+        raise caja['exc']
+    return caja.get('res')
+
+
+def _desempaquetar(res, q):
+    """Separa el valor calificable del conteo de iteraciones, si lo hay.
+
+    Las preguntas de métodos iterativos piden ``return x, iteraciones``. Aquí
+    se acepta tanto eso como devolver solo el vector: si el segundo elemento
+    es un número, se toma como conteo y se comprueba que respete ``max_iter``.
+    """
+    if q.get('salida') != 'matriz_iteraciones':
+        return res, None
+    if (isinstance(res, (tuple, list)) and len(res) == 2
+            and isinstance(res[1], (int, float)) and not isinstance(res[1], bool)):
+        return res[0], int(res[1])
+    return res, None
+
+
 def _acierto_funcion(q, marco):
     """¿La función del alumno pasa TODOS los casos ocultos? Devuelve 1 o 0."""
     fn = funcion_del_alumno(marco, q['funcion'])
     if fn is None:
         return 0
+    segundos = q.get('tiempo_limite')      # None = sin limite
+    tol = q.get('tol', 1e-6)
+    maximo = q.get('max_iter')
     for entrada, esperado in q['casos']:
         try:
-            res = fn(*entrada)
+            res = _llamar(fn, entrada, segundos)
         except Exception:
             return 0
-        if res is None or not comun.comparar(res, esperado):
+        valor, iteraciones = _desempaquetar(res, q)
+        if valor is None or not comun.comparar(valor, esperado, tol=tol):
+            return 0
+        if maximo is not None and iteraciones is not None and iteraciones > maximo:
             return 0
     return 1
 

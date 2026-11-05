@@ -44,9 +44,12 @@ def practica(id_pregunta, tarea_=None):
     entrada, esperado = q['ejemplo']
     print(f'Probando `{q["funcion"]}` con el ejemplo del enunciado…')
     try:
-        res = fn(*entrada)
+        res = califica._llamar(fn, entrada, q.get('tiempo_limite'))
     except NotImplementedError:
         print('⏳ Tu función todavía tiene `raise NotImplementedError`.')
+        return False
+    except TimeoutError as exc:
+        print(f'⛔ {exc}')
         return False
     except Exception as exc:
         print(f'⛔ Tu función lanzó {type(exc).__name__}: {exc}')
@@ -56,13 +59,24 @@ def practica(id_pregunta, tarea_=None):
         print('⏳ Tu función devolvió `None`: todavía no calcula nada.')
         return False
 
-    if comun.comparar(res, esperado):
+    valor, iteraciones = califica._desempaquetar(res, q)
+    if valor is None:
+        print('⏳ Tu función no devolvió un vector.')
+        return False
+    if q.get('salida') == 'matriz_iteraciones' and iteraciones is None:
+        print('💡 Recuerda devolver DOS cosas: `return x, iteraciones`.')
+
+    if comun.comparar(valor, esperado, tol=q.get('tol', 1e-6)):
         print('✅ Coincide con la referencia.')
-        _mostrar(res)
+        _mostrar(valor)
+        if iteraciones is not None:
+            print(f'   Te tomó {iteraciones} iteraciones.')
         return True
 
     print('❌ Todavía no coincide. Tu resultado:')
-    _mostrar(res)
+    _mostrar(valor)
+    if iteraciones is not None:
+        print(f'   ({iteraciones} iteraciones)')
     print('   Revisa el pseudocódigo del cuaderno y los índices '
           '(Python empieza en 0, el libro en 1).')
     return False

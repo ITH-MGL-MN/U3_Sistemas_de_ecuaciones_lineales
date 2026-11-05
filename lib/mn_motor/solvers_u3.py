@@ -173,6 +173,111 @@ def es_diagonal_dominante(A):
     return True
 
 
+# ============================================================
+# Métodos iterativos COMPLETOS, en punto flotante
+# ============================================================
+# Aquí NO se usa aritmética exacta: los métodos iterativos se usan en sistemas
+# grandes, donde el costo de las fracciones crece sin control y donde el error
+# de redondeo es parte de la lección. Todo lo de abajo trabaja en float.
+def _a_float(A):
+    """Matriz -> lista de listas de float."""
+    M = _a_matriz(A)
+    return [[float(sp.N(M[i, j])) for j in range(M.cols)]
+            for i in range(M.rows)]
+
+
+def _b_float(b):
+    """Vector -> lista de float."""
+    return [float(sp.N(v)) for v in _a_vector(b)]
+
+
+def reordenar_dominante(A, b):
+    """Reordena las ECUACIONES (filas) para que la diagonal sea dominante.
+
+    Regla (la misma que se declara en el cuaderno): para cada columna k, de las
+    ecuaciones que todavía no se han usado, se elige la del mayor |a_ik|. Las
+    incógnitas NO se mueven; solo cambia el orden de las ecuaciones.
+
+    Devuelve ``(A2, b2)`` como listas de float.
+    """
+    A2 = _a_float(A)
+    b2 = _b_float(b)
+    n = len(b2)
+    orden: list[int] = []
+    usadas: set[int] = set()
+    for k in range(n):
+        disponibles = [i for i in range(n) if i not in usadas]
+        elegida = max(disponibles, key=lambda i: abs(A2[i][k]))
+        orden.append(elegida)
+        usadas.add(elegida)
+    return [A2[i] for i in orden], [b2[i] for i in orden]
+
+
+def error_relativo_inf(x_nuevo, x_viejo):
+    """||x_nuevo - x_viejo||_inf / ||x_nuevo||_inf, con guarda en cero.
+
+    Se usa la norma infinito del VECTOR (la componente mayor), no el cociente
+    componente por componente: si una incógnita tiende a cero, dividir entre
+    ella hace que el error nunca baje de la tolerancia.
+    """
+    dif = max((abs(a - b) for a, b in zip(x_nuevo, x_viejo)), default=0.0)
+    escala = max((abs(v) for v in x_nuevo), default=0.0)
+    return dif / escala if escala != 0 else dif
+
+
+def _jacobi_crudo(A2, b2, tol, max_iter):
+    """Jacobi sobre la matriz TAL CUAL, sin reordenar (uso interno)."""
+    n = len(b2)
+    x = [0.0] * n
+    for k in range(1, max_iter + 1):
+        nuevo = [0.0] * n
+        for i in range(n):
+            suma = sum(A2[i][j] * x[j] for j in range(n) if j != i)
+            nuevo[i] = (b2[i] - suma) / A2[i][i]
+        err = error_relativo_inf(nuevo, x)
+        x = nuevo
+        if err < tol:
+            return x, k
+    return x, max_iter
+
+
+def _gs_crudo(A2, b2, tol, max_iter):
+    """Gauss-Seidel sobre la matriz TAL CUAL, sin reordenar (uso interno)."""
+    n = len(b2)
+    x = [0.0] * n
+    for k in range(1, max_iter + 1):
+        viejo = list(x)
+        for i in range(n):
+            suma = sum(A2[i][j] * x[j] for j in range(n) if j != i)
+            x[i] = (b2[i] - suma) / A2[i][i]
+        if error_relativo_inf(x, viejo) < tol:
+            return x, k
+    return x, max_iter
+
+
+def jacobi(A, b, tol=1e-6, max_iter=100):
+    """Jacobi completo. Devuelve ``(x, iteraciones)``.
+
+    Reordena las filas primero (ver ``reordenar_dominante``) y se detiene cuando
+    el error relativo infinito baja de ``tol`` o al llegar a ``max_iter``.
+    """
+    A2, b2 = reordenar_dominante(A, b)
+    return _jacobi_crudo(A2, b2, tol, max_iter)
+
+
+def gauss_seidel(A, b, tol=1e-6, max_iter=100):
+    """Gauss-Seidel completo. Devuelve ``(x, iteraciones)``."""
+    A2, b2 = reordenar_dominante(A, b)
+    return _gs_crudo(A2, b2, tol, max_iter)
+
+
+def solucion_exacta(A, b):
+    """La solución del sistema como lista de float (para calificar)."""
+    M = _a_matriz(A)
+    sol = M.inv() * sp.Matrix(_b_float(b))
+    return [float(v) for v in sol]
+
+
 def thomas_descomposicion(e, f, g, r):
     """Fases 1 y 2 de Thomas: devuelve ``(f', r')`` ya modificados.
 
@@ -294,6 +399,55 @@ def sistema_spd(rng, n):
             continue
         return A
     raise RuntimeError(f'no encontré una matriz {n}x{n} definida positiva')
+
+
+def sistema_permutado(rng, n, intentos=300):
+    """Sistema dominante con las filas DESORDENADAS a propósito.
+
+    La solución es entera, pero para llegar a ella hay que reordenar las
+    ecuaciones: tal como viene, Gauss-Seidel y Jacobi no convergen (o
+    convergen a paso de tortuga). Se acepta sólo si el reordenamiento por
+    columnas la vuelve dominante y los dos métodos llegan en menos de 100
+    iteraciones, para que los casos ocultos sean reproducibles.
+    """
+    for _ in range(intentos):
+        A, b = sistema_dominante(rng, n)
+        perm = list(range(n))
+        rng.shuffle(perm)
+        if perm == list(range(n)):
+            continue
+        filas = A.tolist()
+        valores = [int(sp.N(v)) for v in b]
+        A2 = sp.Matrix([filas[i] for i in perm])
+        b2 = sp.Matrix([valores[i] for i in perm])
+        if es_diagonal_dominante(A2):
+            continue          # el desorden no cambió nada: no sirve de caso
+        A3, _ = reordenar_dominante(A2, b2)
+        if not es_diagonal_dominante(sp.Matrix(A3)):
+            continue
+        try:
+            x_gs, k_gs = gauss_seidel(A2, b2)
+            x_ja, k_ja = jacobi(A2, b2)
+        except ZeroDivisionError:
+            continue
+        if k_gs >= 100 or k_ja >= 100:
+            continue
+        sol = solucion_exacta(A2, b2)
+        if max(abs(x_gs[i] - sol[i]) for i in range(n)) > 1e-4:
+            continue
+        if max(abs(x_ja[i] - sol[i]) for i in range(n)) > 1e-4:
+            continue
+        # El caso solo sirve si SIN reordenar de verdad falla: si converge de
+        # todos modos, no está evaluando el reordenamiento.
+        A_crudo, b_crudo = _a_float(A2), _b_float(b2)
+        try:
+            x_c, _ = _gs_crudo(A_crudo, b_crudo, 1e-6, 100)
+        except (ZeroDivisionError, OverflowError):
+            return A2, b2        # sin reordenar ni siquiera se puede dividir
+        if max(abs(x_c[i] - sol[i]) for i in range(n)) < 1e-3:
+            continue
+        return A2, b2
+    raise RuntimeError(f'no encontré un sistema {n}x{n} permutado utilizable')
 
 
 def residual_cero(A, x, b):

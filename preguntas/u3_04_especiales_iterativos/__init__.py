@@ -9,21 +9,30 @@
     6   p06_tridiagonal.py                 matriz   armar A desde e, f, g
     7   p07_fprima.py                      numero   el pivote modificado f'_2
     8   p08_cholesky.py                    numero   la diagonal l_33
-    9   p09_programa_jacobi.py             funcion  una barrida de Jacobi
-    10  p10_programa_seidel.py             funcion  una barrida de Gauss-Seidel
-    11  p11_programa_thomas.py             funcion  el algoritmo de Thomas
+    9   p09_barrida_jacobi.py              matriz   una barrida de Jacobi A MANO
+    10  p10_barrida_seidel.py              matriz   una barrida de Gauss-Seidel A MANO
+    11  p11_programa_jacobi.py             funcion  Jacobi completo
+    12  p12_programa_seidel.py             funcion  Gauss-Seidel completo
+    13  p13_programa_thomas.py             funcion  el algoritmo de Thomas
+
+Orden del cuaderno: primero las matrices especiales (Thomas y Cholesky), que
+son métodos EXACTOS y continúan lo de los cuadernos 02 y 03; después los
+iterativos, que se trabajan en float.
 
 Las de opción múltiple son SOLO su .md (la correcta se marca con ``- [x]``).
 Las demás son un .py con ``construir(semilla)``.
 
-Las de programar piden UNA barrida (o el método completo, en Thomas) y no el
-método iterativo completo: así la respuesta es exacta y no depende del criterio
-de paro, que es una convención y no un resultado.
+Las preguntas 9 y 10 son cuentas a mano (como las de la Unidad 2): una sola
+barrida, escrita con decimales exactos. Las 11 y 12 piden el método COMPLETO,
+con reordenamiento de filas y criterio de paro declarado en la firma; la
+llamada de calificación pasa ``tol=1e-6`` y ``max_iter=100``. La 13 queda en
+aritmética exacta, porque Thomas sí es un método exacto.
 """
 from mn_motor.mcq import desde_markdown
 
-from . import (p06_tridiagonal, p07_fprima, p08_cholesky, p09_programa_jacobi,
-               p10_programa_seidel, p11_programa_thomas)
+from . import (p06_tridiagonal, p07_fprima, p08_cholesky, p09_barrida_jacobi,
+               p10_barrida_seidel, p11_programa_jacobi, p12_programa_seidel,
+               p13_programa_thomas)
 
 CARPETA = 'preguntas/u3_04_especiales_iterativos'
 
@@ -36,7 +45,9 @@ PREGUNTAS = [
     p06_tridiagonal,
     p07_fprima,
     p08_cholesky,
-    p09_programa_jacobi,
-    p10_programa_seidel,
-    p11_programa_thomas,
+    p09_barrida_jacobi,
+    p10_barrida_seidel,
+    p11_programa_jacobi,
+    p12_programa_seidel,
+    p13_programa_thomas,
 ]

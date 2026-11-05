@@ -166,18 +166,20 @@ def _abs(x):
     return _builtins.abs(x) if not isinstance(x, np.ndarray) else np.abs(x)
 
 
-def _max(*args):
-    if len(args) == 1:
+def _max(*args, **kwargs):
+    # kwargs (sobre todo `key=`) se pasan al max de Python: es lo que usa
+    # cualquiera al escribir `max(..., key=...)`, y antes fallaba aquí.
+    if len(args) == 1 and not kwargs:
         a = args[0]
         return np.max(a) if isinstance(a, np.ndarray) else _builtins.max(a)
-    return _builtins.max(*args)
+    return _builtins.max(*args, **kwargs)
 
 
-def _min(*args):
-    if len(args) == 1:
+def _min(*args, **kwargs):
+    if len(args) == 1 and not kwargs:
         a = args[0]
         return np.min(a) if isinstance(a, np.ndarray) else _builtins.min(a)
-    return _builtins.min(*args)
+    return _builtins.min(*args, **kwargs)
 
 
 def _sum(iterable, *args, **kwargs):

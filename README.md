@@ -21,7 +21,7 @@ es autosuficiente.
 | **01** | **Álgebra Lineal** | Construir matrices con sintaxis estilo MATLAB, operaciones de renglón, matriz aumentada, determinante, inversa, álgebra simbólica. |
 | **02** | **Eliminación Gaussiana** | Triangularizar un sistema, multiplicadores, sustitución hacia atrás, **pivoteo** (pivote cero y pivote diminuto), determinante y costo $O(n^3)$. |
 | **03** | **Descomposición LU** | Factorizar $\mathbf{A} = \mathbf{L}\mathbf{U}$ (Doolittle, Crout), reusar la factorización para varios $\mathbf{b}$, inversa, y **número de condición**: cuánto se puede confiar en el resultado. |
-| **04** | **Matrices Especiales y Métodos Iterativos** | Thomas y Cholesky primero; después Gauss-Seidel, Jacobi, relajación y convergencia. Cierra con las funciones de álgebra lineal que ya traen NumPy/SciPy/SymPy y una comparativa de cuándo conviene cada método. El orden sigue a Chapra. |
+| **04** | **Matrices Especiales y Métodos Iterativos** | Thomas y Cholesky primero (métodos exactos, con `M.sym`); después Jacobi y Gauss-Seidel **en decimal**, programando el método completo con reordenamiento de filas y criterio de paro $\\varepsilon = \\|\\Delta\\mathbf{x}\\|_\\infty/\\|\\mathbf{x}\\|_\\infty < 10^{-6}$. Cierra con las funciones de álgebra lineal que ya traen NumPy/SciPy/SymPy y una comparativa de cuándo conviene cada método. El orden sigue a Chapra. |
 
 ---
 

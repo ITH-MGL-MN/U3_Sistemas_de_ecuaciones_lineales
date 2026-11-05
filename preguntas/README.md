@@ -19,10 +19,16 @@ preguntas/
 └── u3_04_especiales_iterativos/  Cuaderno 04 — Especiales e iterativos
 ```
 
-Cada cuaderno tiene 11 preguntas: 5 de opción múltiple, 3 con dato calculado y 3
-de **programar**. La excepción es el cuaderno 03, que tiene **12**: la última
-pide el número de condición, porque ese cuaderno también cubre la confiabilidad
-del resultado (`docs/metodos/02_descomposicion_lu.md`, sección 2.5).
+Cada cuaderno tiene **al menos 11 preguntas**: 5 de opción múltiple, 3 con dato
+calculado y 3 de **programar**. Dos cuadernos tienen más:
+
+- **03** llega a 12: la última pide el número de condición, porque ese cuaderno
+  también cubre la confiabilidad del resultado
+  (`docs/metodos/02_descomposicion_lu.md`, sección 2.5).
+- **04** llega a 13: además de las 3 de programar, dos son **cuentas a mano**
+  (una barrida de Jacobi y una de Gauss-Seidel), como las de la Unidad 2. Esas
+  dos sirven de puente: primero se hace el paso a mano, después el método
+  completo.
 
 ## Cómo se llega a una pregunta
 

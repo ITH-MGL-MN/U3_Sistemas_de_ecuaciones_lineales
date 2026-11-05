@@ -25,19 +25,25 @@ def construir(semilla):
     rng = random.Random(semilla ^ SAL)
 
     n = 3
-    f0 = rng.choice([2, 3, 4])
-    f = [f0, rng.choice([3, 4, 5, 6, 7]), rng.choice([3, 4, 5, 6, 7])]
-    # e[1] múltiplo de f[0] -> e'_2 entero -> f'_2 entero.
-    e = [0, f0 * rng.choice([-2, -1, 1, 2]), rng.choice([-2, -1, 1, 2])]
-    g = [rng.choice([-3, -2, -1, 1, 2, 3]) for _ in range(2)] + [0]
-    r = [rng.choice([-5, -4, -3, 3, 4, 5]) for _ in range(n)]
-
-    fp, _ = ref.thomas_descomposicion(e, f, g, r)
-    esperado = sp.nsimplify(fp[1])
-
-    # Red de seguridad: la respuesta tiene que ser un entero escribible a mano.
-    if not esperado.is_Integer:
-        raise AssertionError(f'f\'_2 salió {esperado}, no entero')
+    # Se sortea hasta que la descomposición de Thomas se pueda hacer completa:
+    # si un pivote modificado sale 0, el método no avanza y la pregunta no
+    # tendría respuesta (le pasó a alumnos reales con algunas semillas).
+    for _ in range(200):
+        f0 = rng.choice([2, 3, 4])
+        f = [f0, rng.choice([3, 4, 5, 6, 7]), rng.choice([3, 4, 5, 6, 7])]
+        # e[1] múltiplo de f[0] -> e'_2 entero -> f'_2 entero.
+        e = [0, f0 * rng.choice([-2, -1, 1, 2]), rng.choice([-2, -1, 1, 2])]
+        g = [rng.choice([-3, -2, -1, 1, 2, 3]) for _ in range(2)] + [0]
+        r = [rng.choice([-5, -4, -3, 3, 4, 5]) for _ in range(n)]
+        try:
+            fp, _ = ref.thomas_descomposicion(e, f, g, r)
+        except ZeroDivisionError:
+            continue
+        esperado = sp.nsimplify(fp[1])
+        if esperado.is_Integer and esperado != 0:
+            break
+    else:
+        raise RuntimeError('no encontré datos con f\'_2 entero distinto de cero')
 
     return {
         'tipo': 'numero',

@@ -150,7 +150,7 @@ def _es_lista_de_matrices(x):
             and isinstance(primero[0], (list, tuple)))
 
 
-def comparar(respuesta, esperado):
+def comparar(respuesta, esperado, tol=1e-6):
     """Compara la respuesta con lo esperado, admitiendo VARIAS matrices.
 
     Los métodos que devuelven dos resultados (por ejemplo LU entrega ``L`` y
@@ -163,8 +163,8 @@ def comparar(respuesta, esperado):
             return False
         if len(partes) != len(esperado):
             return False
-        return all(matriz_igual(p, e) for p, e in zip(partes, esperado))
-    return matriz_igual(respuesta, esperado)
+        return all(matriz_igual(p, e, tol=tol) for p, e in zip(partes, esperado))
+    return matriz_igual(respuesta, esperado, tol=tol)
 
 
 def numero_igual(respuesta, esperado, tol=1e-6):

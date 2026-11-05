@@ -90,7 +90,7 @@ $$|a_{ii}| > \sum_{j=1,\, j \neq i}^{n} |a_{ij}|, \qquad \forall i \in \{1,\dots
 
 Si se cumple, Gauss-Seidel converge a la solución única para cualquier $\mathbf{x}^{(0)}$. La condición no es necesaria —hay matrices no dominantes que convergen—, pero sí es suficiente y fácil de verificar antes de programar.
 
-Cuando un renglón no la cumple, reordenar las ecuaciones (intercambiar renglones) puede convertir la matriz en dominante; basta con emparejar cada incógnita con la ecuación donde tiene el coeficiente mayor.
+Cuando un renglón no la cumple, reordenar las ecuaciones (intercambiar renglones) puede convertir la matriz en dominante. La regla que se usa en el Cuaderno 04, y que conviene declarar tal cual al programar, es: **para cada columna $k$, de las ecuaciones que todavía no se han usado, tomar la del mayor $|a_{ik}|$.** Las incógnitas no se mueven; solo cambia el orden de las ecuaciones, y con él cuál coeficiente ocupa la diagonal.
 
 **🧮 Ejemplo algebraico.** Para un sistema $3\times 3$ con letras, las tres condiciones son
 
@@ -145,31 +145,29 @@ $$\mathbf{x}^{(1)} = \left[\frac{9}{10},\ \frac{516}{175},\ \frac{13631}{3500}\r
 
 ### <a id="sec-3-5"></a>3.5 Criterio de Paro por Error Relativo
 
-**📘 Teoría.** Un método iterativo necesita una regla para detenerse. La más común compara, componente por componente, el valor nuevo contra el anterior:
+**📘 Teoría.** Un método iterativo necesita una regla para detenerse. La que se usa en este curso compara la barrida nueva contra la anterior con la **norma infinito del vector** (definida en la [sección 2.5](02_descomposicion_lu.md#sec-2-5)):
 
-$$\varepsilon_{a,i} = \left| \frac{x_i^{(k+1)} - x_i^{(k)}}{x_i^{(k+1)}} \right| \times 100\% < \varepsilon_s, \qquad \forall i = 1,\dots,n.$$
+$$\varepsilon = \frac{\left\| \mathbf{x}^{(k+1)} - \mathbf{x}^{(k)} \right\|_\infty}{\left\| \mathbf{x}^{(k+1)} \right\|_\infty} = \frac{\max_i \left| x_i^{(k+1)} - x_i^{(k)} \right|}{\max_i \left| x_i^{(k+1)} \right|} < \varepsilon_s.$$
 
-Se usa error relativo y no absoluto para que el criterio no dependa de la escala de las incógnitas.
+Se usa error **relativo** y no absoluto para que el criterio no dependa de la escala de las incógnitas: no es lo mismo equivocarse en una longitud medida en metros que en micras.
 
-Ese máximo de los $\varepsilon_{a,i}$ es, con el vocabulario de la [sección 2.5](02_descomposicion_lu.md#sec-2-5), la **norma $\infty$** del vector de errores relativos: la componente que más cambió es la que manda. El criterio se detiene cuando
+> ⚠️ **Por qué con la norma y no componente por componente.** La tentación es dividir cada componente entre su propio valor,
+> $\varepsilon_{a,i} = |x_i^{(k+1)} - x_i^{(k)}| / |x_i^{(k+1)}|$, y exigir que el máximo baje de la tolerancia. Falla en cuanto una incógnita vale cero o se le acerca: el cociente se dispara y el método **nunca** cumple el criterio, aunque la solución ya esté exacta. Con la norma, el denominador es la componente **mayor**, que solo se anula si todo el vector es cero.
 
-$$\left\| \boldsymbol{\varepsilon}_a \right\|_\infty < \varepsilon_s.$$
+Y una salvaguarda: si $\|\mathbf{x}^{(k+1)}\|_\infty = 0$, el cociente no está definido; en ese caso se compara el cambio **absoluto**, que es lo único que queda.
 
-La división entre $x_i^{(k+1)}$ trae un detalle: si una componente vale cero, el error relativo no está definido y hay que tratarla aparte, por ejemplo esperando a que la componente sea distinta de cero o revisando el cambio absoluto.
+**🧮 Ejemplo algebraico.** Para $n = 2$ y $\varepsilon_s = 10^{-6}$, el criterio es un solo número:
 
-**🧮 Ejemplo algebraico.** Para $n = 2$ el criterio exige las dos condiciones a la vez:
+$$\varepsilon = \frac{\max\left(|x_1^{(k+1)} - x_1^{(k)}|,\ |x_2^{(k+1)} - x_2^{(k)}|\right)}{\max\left(|x_1^{(k+1)}|,\ |x_2^{(k+1)}|\right)} < 10^{-6}.$$
 
-$$\left| \frac{x_1^{(k+1)} - x_1^{(k)}}{x_1^{(k+1)}} \right| \times 100 < \varepsilon_s
-\quad \text{y} \quad
-\left| \frac{x_2^{(k+1)} - x_2^{(k)}}{x_2^{(k+1)}} \right| \times 100 < \varepsilon_s.$$
-
-Si una sola de las dos falla, la iteración continúa. El error reportado en la tabla de resultados es el máximo de las dos.
+Basta que la componente que más cambió ya cambie poco, en proporción a la componente más grande del vector.
 
 **🔢 Versión con enteros (paso a paso).** Con los resultados del subtema 3.2:
 
-1. **Iteración 1:** no se puede calcular error relativo porque el vector anterior es $\mathbf{x}^{(0)} = [0,0,0]$ y la fórmula divide entre el valor nuevo. El error se reporta como "—".
-2. **Iteración 2:** el error relativo máximo es $0.1647$ (un $16.47\%$), todavía lejos de la tolerancia de $10^{-6}$.
-3. **Iteración 3:** el error relativo máximo baja a $0.0299$ (un $2.99\%$). Sigue siendo mayor que la tolerancia, así que el algoritmo continuaría.
+1. **Iteración 1:** el vector anterior es $\mathbf{x}^{(0)} = [0,0,0]$ y $\|\mathbf{x}^{(1)}\|_\infty \neq 0$, así que el criterio sí se puede evaluar: el cambio mayor es $3.1458$ y $\|\mathbf{x}^{(1)}\|_\infty = 3.1458$, o sea $\varepsilon = 1$. No se cumple.
+2. **Iteración 2:** el cambio mayor es $|2.0045 - 2.5000| = 0.4955$ y $\|\mathbf{x}^{(2)}\|_\infty = 3.0085$, así que $\varepsilon = 0.1647$. Tampoco.
+3. **Iteración 3:** el cambio mayor es $0.0895$ y $\|\mathbf{x}^{(3)}\|_\infty = 2.9995$, o sea $\varepsilon = 0.0299$. Sigue siendo mayor que $10^{-6}$, así que el algoritmo continuaría.
+4. **Iteración 4:** $\varepsilon = 0.000498$. Como cada barrida reduce el error unas $18$ veces (el radio espectral de la [sección 3.6](#sec-3-6) vale $0.0546$), el criterio de $10^{-6}$ se cumple en la **iteración 7**.
 4. La tendencia —de $0.1647$ a $0.0299$— muestra convergencia: el criterio de paro aún no se satisface en la iteración 3.
 
 ---
