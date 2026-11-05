@@ -43,6 +43,15 @@ CUADERNOS = {
     'u3_04_especiales_iterativos': {'tarea_id': 'U3_04_Especiales_Iterativos'},
 }
 
+# Los cuatro cuadernos oficiales (los que se publican con blob). Los demás
+# .ipynb del repositorio son material viejo pendiente de borrar y no se revisan.
+CUADERNOS_NB = {
+    'u3_01_algebra_lineal': 'U3_01_Algebra_Lineal.ipynb',
+    'u3_02_gaussiana': 'U3_02_Eliminacion_Gaussiana.ipynb',
+    'u3_03_lu': 'U3_03_Descomposicion_LU.ipynb',
+    'u3_04_especiales_iterativos': 'U3_04_Especiales_Iterativos.ipynb',
+}
+
 _COLA = '''
 
 # =====================================================================
@@ -263,6 +272,38 @@ def construir_blob(cuaderno, salida=None, verboso=True):
     return True, destino
 
 
+def revisar_cuadernos():
+    """Comprueba que los cuadernos publicados no traigan salidas guardadas.
+
+    Un `.ipynb` con outputs arrastra basura al repositorio: resultados viejos,
+    estado de widgets y —lo peor— tracebacks en rojo que el alumno ve al abrir
+    el cuaderno aunque el código esté bien. Regla: lo que se publica va limpio.
+
+    Solo revisa los cuatro cuadernos oficiales (``CUADERNOS_NB``); el resto de
+    .ipynb del repositorio es material viejo que no se publica.
+    Devuelve la lista de (archivo, celdas_con_salida, celdas_con_error).
+    """
+    import json
+
+    problemas = []
+    for nombre in CUADERNOS_NB.values():
+        ruta = os.path.join(RAIZ, 'notebooks', nombre)
+        if not os.path.isfile(ruta):
+            continue
+        try:
+            with open(ruta, encoding='utf-8') as f:
+                nb = json.load(f)
+        except (OSError, ValueError):
+            continue
+        con_salida = sum(1 for c in nb.get('cells', []) if c.get('outputs'))
+        con_error = sum(1 for c in nb.get('cells', [])
+                        for o in c.get('outputs', [])
+                        if o.get('output_type') == 'error')
+        if con_salida:
+            problemas.append((nombre, con_salida, con_error))
+    return problemas
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--cuaderno', default=None, choices=sorted(CUADERNOS),
@@ -288,9 +329,23 @@ def main():
             print(f'⛔ {cuaderno}: {msg}', file=sys.stderr)
         print()
 
+    # Los cuadernos son lo que ve el alumno: no deben llevar salidas guardadas.
+    sucios = revisar_cuadernos()
+    if sucios:
+        print('⛔ Hay cuadernos con salidas guardadas (deben ir limpios):',
+              file=sys.stderr)
+        for nombre, n, con_error in sucios:
+            extra = f' · {con_error} con error' if con_error else ''
+            print(f'   {nombre}: {n} celda(s){extra}', file=sys.stderr)
+        print('   Bórralas antes de publicar (Cell > All Output > Clear).',
+              file=sys.stderr)
+        fallos += 1
+
     if fallos:
         return 1
-    print(f'Verificado: {len(lista)} blob(s) se descomprimen, cargan en memoria y califican todo bien.')
+    print(f'Verificado: {len(lista)} blob(s) se descomprimen, cargan en memoria '
+          f'y califican todo bien.')
+    print('Cuadernos: sin salidas guardadas.')
     return 0
 
 
